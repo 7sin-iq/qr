@@ -1,0 +1,1305 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#13233f"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>بطاقات الحضور | UniAttend</title>
+<style>
+:root{--ink:#13233f;--muted:#60708b;--line:#dce5f1;--blue:#315bd8;--soft:#f4f7fc;--green:#07856a}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(145deg,#eef4ff,#f9fbff 55%,#edf8f5);font-family:Tahoma,Arial,sans-serif;color:var(--ink)}
+button,input{font:inherit}button{cursor:pointer;touch-action:manipulation}.app{width:min(100%,720px);margin:auto;padding:18px 14px 44px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.brand{display:flex;align-items:center;gap:11px}.mark{width:44px;height:44px;border-radius:14px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:900;font-size:19px;box-shadow:0 10px 22px #13233f22}h1{font-size:20px;margin:0}.sub{color:var(--muted);font-size:12px;margin-top:4px}.install{border:1px solid var(--line);background:#fff;color:var(--blue);border-radius:11px;padding:10px 12px;font-size:12px;font-weight:bold}
+.panel,.card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 42px #13233f12}.panel{padding:20px}.intro{margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.8}.search{position:relative}.search input{width:100%;padding:14px 16px;border:1px solid #cbd7e8;border-radius:13px;outline:none;background:#fbfdff;font-size:16px}.search input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #315bd81a}.count{font-size:12px;color:var(--muted);margin:12px 2px}.results{display:grid;gap:8px;max-height:54vh;overflow:auto;padding-left:2px}.student{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:right;width:100%;border:1px solid #e2e8f2;background:#fff;border-radius:13px;padding:13px 14px;color:var(--ink)}.student:hover,.student:focus{border-color:#a8b9e8;background:#f7f9ff}.student strong{display:block;font-size:14px}.student small{display:block;color:var(--muted);font-size:11px;margin-top:4px}.arrow{color:var(--blue);font-size:20px}.empty{color:var(--muted);text-align:center;padding:24px}
+#lock{display:none}.lock-title{margin:0 0 6px;font-size:19px}.selected{font-weight:bold;color:var(--blue);font-size:14px;margin:0 0 16px}.hint{color:var(--muted);font-size:13px;line-height:1.8;margin:0 0 10px}.code{width:100%;padding:14px;border:1px solid #cbd7e8;border-radius:12px;text-align:center;letter-spacing:.22em;font-size:22px;outline:none}.primary{width:100%;border:0;background:var(--blue);color:white;border-radius:12px;padding:14px;margin-top:10px;font-weight:bold;min-height:50px}.secondary{width:100%;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:12px;margin-top:10px;min-height:46px}.error{color:#b42318;font-size:13px;line-height:1.7;min-height:22px;margin-top:9px}.help{background:var(--soft);color:var(--muted);font-size:12px;line-height:1.8;padding:11px;border-radius:11px;margin-top:14px}
+#card{display:none;overflow:hidden;text-align:center}.head{background:var(--ink);color:#fff;padding:22px}.head h2{font-size:21px;margin:0 0 7px}.head div{font-size:12px;opacity:.78}.body{padding:20px}.name{font-size:22px;font-weight:bold;margin:2px 0 7px;line-height:1.5}.sid{color:var(--muted);font-size:13px;margin:3px}.qr{width:min(100%,360px);margin:18px auto 12px;display:grid;place-items:center}.qr canvas{width:100%;height:auto;image-rendering:pixelated}.note{font-size:12px;color:var(--muted);line-height:1.8}.status{color:var(--green);font-size:12px;margin-top:12px}.card-actions{padding:0 20px 20px}
+.footer{text-align:center;color:var(--muted);font-size:11px;margin-top:18px;line-height:1.7}
+@media (min-width:600px){.app{padding-top:34px}.results{grid-template-columns:1fr 1fr;max-height:560px}}
+</style></head>
+<body><main class="app">
+<header class="top"><div class="brand"><div class="mark">QR</div><div><h1>بطاقات الحضور</h1><div class="sub">UniAttend · نظام الحضور الإلكتروني</div></div></div><button class="install" id="install">تثبيت على الشاشة</button></header>
+<section class="panel" id="home"><p class="intro">ابحث عن اسمك ثم اختر بطاقتك. بعد التفعيل مرة واحدة سيظهر الباركود تلقائياً في كل مرة، حتى بدون إنترنت.</p><div class="search"><input id="search" type="search" placeholder="اكتب اسم الطالب..." autocomplete="off" enterkeyhint="search"></div><div class="count" id="count"></div><div class="results" id="results"></div></section>
+<section class="panel" id="lock"><h2 class="lock-title">تفعيل بطاقة الحضور</h2><p class="selected" id="selected"></p><p class="hint">أدخل رمز التفعيل الذي يعطيك إياه رئيس القسم. يُطلب هذا الرمز مرة واحدة على هذا الجهاز فقط.</p><input class="code" id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="رمز التفعيل"><button class="primary" id="activate">تفعيل البطاقة</button><div class="error" id="err" role="status" aria-live="polite"></div><div class="help">للآيفون افتح الرابط في Safari، وللأندرويد افتحه في Chrome. لا تستخدم معاينة تطبيق «الملفات» عند أول تفعيل.</div><button class="secondary" id="back">العودة إلى قائمة الطلبة</button></section>
+<section class="card" id="card"><header class="head"><h2>بطاقة حضور جامعية</h2><div>UniAttend</div></header><div class="body"><div class="name" id="name"></div><div class="sid" id="sid"></div><div class="sid" id="dept"></div><div class="qr" id="qr"></div><div class="note">اعرض هذا الباركود المتغيّر على قارئ الحضور</div><div class="status">البطاقة مفعّلة على هذا الجهاز</div></div><div class="card-actions"><button class="secondary" id="change">اختيار بطاقة أخرى</button></div></section>
+<div class="footer">يعمل التطبيق دون اتصال بعد فتحه مرة واحدة من الرابط.</div></main>
+<script>
+/* Offline QR generator, bundled from qrcode-terminal's MIT-licensed QRCode implementation. */
+(function(){var modules={},cache={};
+modules['QR8bitByte']=function(require,module,exports){
+var QRMode = require('./QRMode');
+
+function QR8bitByte(data) {
+	this.mode = QRMode.MODE_8BIT_BYTE;
+	this.data = data;
+}
+
+QR8bitByte.prototype = {
+
+	getLength : function() {
+		return this.data.length;
+	},
+	
+	write : function(buffer) {
+		for (var i = 0; i < this.data.length; i++) {
+			// not JIS ...
+			buffer.put(this.data.charCodeAt(i), 8);
+		}
+	}
+};
+
+module.exports = QR8bitByte;
+
+};
+modules['QRBitBuffer']=function(require,module,exports){
+function QRBitBuffer() {
+	this.buffer = [];
+	this.length = 0;
+}
+
+QRBitBuffer.prototype = {
+
+	get : function(index) {
+		var bufIndex = Math.floor(index / 8);
+		return ( (this.buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+	},
+	
+	put : function(num, length) {
+		for (var i = 0; i < length; i++) {
+			this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+		}
+	},
+	
+	getLengthInBits : function() {
+		return this.length;
+	},
+	
+	putBit : function(bit) {
+	
+		var bufIndex = Math.floor(this.length / 8);
+		if (this.buffer.length <= bufIndex) {
+			this.buffer.push(0);
+		}
+	
+		if (bit) {
+			this.buffer[bufIndex] |= (0x80 >>> (this.length % 8) );
+		}
+	
+		this.length++;
+	}
+};
+
+module.exports = QRBitBuffer;
+
+};
+modules['QRErrorCorrectLevel']=function(require,module,exports){
+module.exports = {
+	L : 1,
+	M : 0,
+	Q : 3,
+	H : 2
+};
+
+
+};
+modules['QRMaskPattern']=function(require,module,exports){
+module.exports = {
+	PATTERN000 : 0,
+	PATTERN001 : 1,
+	PATTERN010 : 2,
+	PATTERN011 : 3,
+	PATTERN100 : 4,
+	PATTERN101 : 5,
+	PATTERN110 : 6,
+	PATTERN111 : 7
+};
+
+};
+modules['QRMath']=function(require,module,exports){
+var QRMath = {
+
+	glog : function(n) {
+	
+		if (n < 1) {
+			throw new Error("glog(" + n + ")");
+		}
+		
+		return QRMath.LOG_TABLE[n];
+	},
+	
+	gexp : function(n) {
+	
+		while (n < 0) {
+			n += 255;
+		}
+	
+		while (n >= 256) {
+			n -= 255;
+		}
+	
+		return QRMath.EXP_TABLE[n];
+	},
+	
+	EXP_TABLE : new Array(256),
+	
+	LOG_TABLE : new Array(256)
+
+};
+	
+for (var i = 0; i < 8; i++) {
+	QRMath.EXP_TABLE[i] = 1 << i;
+}
+for (var i = 8; i < 256; i++) {
+	QRMath.EXP_TABLE[i] = QRMath.EXP_TABLE[i - 4]
+		^ QRMath.EXP_TABLE[i - 5]
+		^ QRMath.EXP_TABLE[i - 6]
+		^ QRMath.EXP_TABLE[i - 8];
+}
+for (var i = 0; i < 255; i++) {
+	QRMath.LOG_TABLE[QRMath.EXP_TABLE[i] ] = i;
+}
+
+module.exports = QRMath;
+
+};
+modules['QRMode']=function(require,module,exports){
+module.exports = {
+    MODE_NUMBER :       1 << 0,
+    MODE_ALPHA_NUM :    1 << 1,
+    MODE_8BIT_BYTE :    1 << 2,
+    MODE_KANJI :        1 << 3
+};
+
+};
+modules['QRPolynomial']=function(require,module,exports){
+var QRMath = require('./QRMath');
+
+function QRPolynomial(num, shift) {
+	if (num.length === undefined) {
+		throw new Error(num.length + "/" + shift);
+	}
+
+	var offset = 0;
+
+	while (offset < num.length && num[offset] === 0) {
+		offset++;
+	}
+
+	this.num = new Array(num.length - offset + shift);
+	for (var i = 0; i < num.length - offset; i++) {
+		this.num[i] = num[i + offset];
+	}
+}
+
+QRPolynomial.prototype = {
+
+	get : function(index) {
+		return this.num[index];
+	},
+	
+	getLength : function() {
+		return this.num.length;
+	},
+	
+	multiply : function(e) {
+	
+		var num = new Array(this.getLength() + e.getLength() - 1);
+	
+		for (var i = 0; i < this.getLength(); i++) {
+			for (var j = 0; j < e.getLength(); j++) {
+				num[i + j] ^= QRMath.gexp(QRMath.glog(this.get(i) ) + QRMath.glog(e.get(j) ) );
+			}
+		}
+	
+		return new QRPolynomial(num, 0);
+	},
+	
+	mod : function(e) {
+	
+		if (this.getLength() - e.getLength() < 0) {
+			return this;
+		}
+	
+		var ratio = QRMath.glog(this.get(0) ) - QRMath.glog(e.get(0) );
+	
+		var num = new Array(this.getLength() );
+		
+		for (var i = 0; i < this.getLength(); i++) {
+			num[i] = this.get(i);
+		}
+		
+		for (var x = 0; x < e.getLength(); x++) {
+			num[x] ^= QRMath.gexp(QRMath.glog(e.get(x) ) + ratio);
+		}
+	
+		// recursive call
+		return new QRPolynomial(num, 0).mod(e);
+	}
+};
+
+module.exports = QRPolynomial;
+
+};
+modules['QRRSBlock']=function(require,module,exports){
+var QRErrorCorrectLevel = require('./QRErrorCorrectLevel');
+
+function QRRSBlock(totalCount, dataCount) {
+	this.totalCount = totalCount;
+	this.dataCount  = dataCount;
+}
+
+QRRSBlock.RS_BLOCK_TABLE = [
+
+	// L
+	// M
+	// Q
+	// H
+
+	// 1
+	[1, 26, 19],
+	[1, 26, 16],
+	[1, 26, 13],
+	[1, 26, 9],
+	
+	// 2
+	[1, 44, 34],
+	[1, 44, 28],
+	[1, 44, 22],
+	[1, 44, 16],
+
+	// 3
+	[1, 70, 55],
+	[1, 70, 44],
+	[2, 35, 17],
+	[2, 35, 13],
+
+	// 4		
+	[1, 100, 80],
+	[2, 50, 32],
+	[2, 50, 24],
+	[4, 25, 9],
+	
+	// 5
+	[1, 134, 108],
+	[2, 67, 43],
+	[2, 33, 15, 2, 34, 16],
+	[2, 33, 11, 2, 34, 12],
+	
+	// 6
+	[2, 86, 68],
+	[4, 43, 27],
+	[4, 43, 19],
+	[4, 43, 15],
+	
+	// 7		
+	[2, 98, 78],
+	[4, 49, 31],
+	[2, 32, 14, 4, 33, 15],
+	[4, 39, 13, 1, 40, 14],
+	
+	// 8
+	[2, 121, 97],
+	[2, 60, 38, 2, 61, 39],
+	[4, 40, 18, 2, 41, 19],
+	[4, 40, 14, 2, 41, 15],
+	
+	// 9
+	[2, 146, 116],
+	[3, 58, 36, 2, 59, 37],
+	[4, 36, 16, 4, 37, 17],
+	[4, 36, 12, 4, 37, 13],
+	
+	// 10		
+	[2, 86, 68, 2, 87, 69],
+	[4, 69, 43, 1, 70, 44],
+	[6, 43, 19, 2, 44, 20],
+	[6, 43, 15, 2, 44, 16],
+
+	// 11
+	[4, 101, 81],
+	[1, 80, 50, 4, 81, 51],
+	[4, 50, 22, 4, 51, 23],
+	[3, 36, 12, 8, 37, 13],
+
+	// 12
+	[2, 116, 92, 2, 117, 93],
+	[6, 58, 36, 2, 59, 37],
+	[4, 46, 20, 6, 47, 21],
+	[7, 42, 14, 4, 43, 15],
+
+	// 13
+	[4, 133, 107],
+	[8, 59, 37, 1, 60, 38],
+	[8, 44, 20, 4, 45, 21],
+	[12, 33, 11, 4, 34, 12],
+
+	// 14
+	[3, 145, 115, 1, 146, 116],
+	[4, 64, 40, 5, 65, 41],
+	[11, 36, 16, 5, 37, 17],
+	[11, 36, 12, 5, 37, 13],
+
+	// 15
+	[5, 109, 87, 1, 110, 88],
+	[5, 65, 41, 5, 66, 42],
+	[5, 54, 24, 7, 55, 25],
+	[11, 36, 12],
+
+	// 16
+	[5, 122, 98, 1, 123, 99],
+	[7, 73, 45, 3, 74, 46],
+	[15, 43, 19, 2, 44, 20],
+	[3, 45, 15, 13, 46, 16],
+
+	// 17
+	[1, 135, 107, 5, 136, 108],
+	[10, 74, 46, 1, 75, 47],
+	[1, 50, 22, 15, 51, 23],
+	[2, 42, 14, 17, 43, 15],
+
+	// 18
+	[5, 150, 120, 1, 151, 121],
+	[9, 69, 43, 4, 70, 44],
+	[17, 50, 22, 1, 51, 23],
+	[2, 42, 14, 19, 43, 15],
+
+	// 19
+	[3, 141, 113, 4, 142, 114],
+	[3, 70, 44, 11, 71, 45],
+	[17, 47, 21, 4, 48, 22],
+	[9, 39, 13, 16, 40, 14],
+
+	// 20
+	[3, 135, 107, 5, 136, 108],
+	[3, 67, 41, 13, 68, 42],
+	[15, 54, 24, 5, 55, 25],
+	[15, 43, 15, 10, 44, 16],
+
+	// 21
+	[4, 144, 116, 4, 145, 117],
+	[17, 68, 42],
+	[17, 50, 22, 6, 51, 23],
+	[19, 46, 16, 6, 47, 17],
+
+	// 22
+	[2, 139, 111, 7, 140, 112],
+	[17, 74, 46],
+	[7, 54, 24, 16, 55, 25],
+	[34, 37, 13],
+
+	// 23
+	[4, 151, 121, 5, 152, 122],
+	[4, 75, 47, 14, 76, 48],
+	[11, 54, 24, 14, 55, 25],
+	[16, 45, 15, 14, 46, 16],
+
+	// 24
+	[6, 147, 117, 4, 148, 118],
+	[6, 73, 45, 14, 74, 46],
+	[11, 54, 24, 16, 55, 25],
+	[30, 46, 16, 2, 47, 17],
+
+	// 25
+	[8, 132, 106, 4, 133, 107],
+	[8, 75, 47, 13, 76, 48],
+	[7, 54, 24, 22, 55, 25],
+	[22, 45, 15, 13, 46, 16],
+
+	// 26
+	[10, 142, 114, 2, 143, 115],
+	[19, 74, 46, 4, 75, 47],
+	[28, 50, 22, 6, 51, 23],
+	[33, 46, 16, 4, 47, 17],
+
+	// 27
+	[8, 152, 122, 4, 153, 123],
+	[22, 73, 45, 3, 74, 46],
+	[8, 53, 23, 26, 54, 24],
+	[12, 45, 15, 28, 46, 16],
+
+	// 28
+	[3, 147, 117, 10, 148, 118],
+	[3, 73, 45, 23, 74, 46],
+	[4, 54, 24, 31, 55, 25],
+	[11, 45, 15, 31, 46, 16],
+
+	// 29
+	[7, 146, 116, 7, 147, 117],
+	[21, 73, 45, 7, 74, 46],
+	[1, 53, 23, 37, 54, 24],
+	[19, 45, 15, 26, 46, 16],
+
+	// 30
+	[5, 145, 115, 10, 146, 116],
+	[19, 75, 47, 10, 76, 48],
+	[15, 54, 24, 25, 55, 25],
+	[23, 45, 15, 25, 46, 16],
+
+	// 31
+	[13, 145, 115, 3, 146, 116],
+	[2, 74, 46, 29, 75, 47],
+	[42, 54, 24, 1, 55, 25],
+	[23, 45, 15, 28, 46, 16],
+
+	// 32
+	[17, 145, 115],
+	[10, 74, 46, 23, 75, 47],
+	[10, 54, 24, 35, 55, 25],
+	[19, 45, 15, 35, 46, 16],
+
+	// 33
+	[17, 145, 115, 1, 146, 116],
+	[14, 74, 46, 21, 75, 47],
+	[29, 54, 24, 19, 55, 25],
+	[11, 45, 15, 46, 46, 16],
+
+	// 34
+	[13, 145, 115, 6, 146, 116],
+	[14, 74, 46, 23, 75, 47],
+	[44, 54, 24, 7, 55, 25],
+	[59, 46, 16, 1, 47, 17],
+
+	// 35
+	[12, 151, 121, 7, 152, 122],
+	[12, 75, 47, 26, 76, 48],
+	[39, 54, 24, 14, 55, 25],
+	[22, 45, 15, 41, 46, 16],
+
+	// 36
+	[6, 151, 121, 14, 152, 122],
+	[6, 75, 47, 34, 76, 48],
+	[46, 54, 24, 10, 55, 25],
+	[2, 45, 15, 64, 46, 16],
+
+	// 37
+	[17, 152, 122, 4, 153, 123],
+	[29, 74, 46, 14, 75, 47],
+	[49, 54, 24, 10, 55, 25],
+	[24, 45, 15, 46, 46, 16],
+
+	// 38
+	[4, 152, 122, 18, 153, 123],
+	[13, 74, 46, 32, 75, 47],
+	[48, 54, 24, 14, 55, 25],
+	[42, 45, 15, 32, 46, 16],
+
+	// 39
+	[20, 147, 117, 4, 148, 118],
+	[40, 75, 47, 7, 76, 48],
+	[43, 54, 24, 22, 55, 25],
+	[10, 45, 15, 67, 46, 16],
+
+	// 40
+	[19, 148, 118, 6, 149, 119],
+	[18, 75, 47, 31, 76, 48],
+	[34, 54, 24, 34, 55, 25],
+	[20, 45, 15, 61, 46, 16]
+];
+
+QRRSBlock.getRSBlocks = function(typeNumber, errorCorrectLevel) {
+	
+	var rsBlock = QRRSBlock.getRsBlockTable(typeNumber, errorCorrectLevel);
+	
+	if (rsBlock === undefined) {
+		throw new Error("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + errorCorrectLevel);
+	}
+
+	var length = rsBlock.length / 3;
+	
+	var list = [];
+	
+	for (var i = 0; i < length; i++) {
+
+		var count = rsBlock[i * 3 + 0];
+		var totalCount = rsBlock[i * 3 + 1];
+		var dataCount  = rsBlock[i * 3 + 2];
+
+		for (var j = 0; j < count; j++) {
+			list.push(new QRRSBlock(totalCount, dataCount) );	
+		}
+	}
+	
+	return list;
+};
+
+QRRSBlock.getRsBlockTable = function(typeNumber, errorCorrectLevel) {
+
+	switch(errorCorrectLevel) {
+	case QRErrorCorrectLevel.L :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+	case QRErrorCorrectLevel.M :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+	case QRErrorCorrectLevel.Q :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+	case QRErrorCorrectLevel.H :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+	default :
+		return undefined;
+	}
+};
+
+module.exports = QRRSBlock;
+
+};
+modules['QRUtil']=function(require,module,exports){
+var QRMode = require('./QRMode');
+var QRPolynomial = require('./QRPolynomial');
+var QRMath = require('./QRMath');
+var QRMaskPattern = require('./QRMaskPattern');
+
+var QRUtil = {
+
+    PATTERN_POSITION_TABLE : [
+        [],
+        [6, 18],
+        [6, 22],
+        [6, 26],
+        [6, 30],
+        [6, 34],
+        [6, 22, 38],
+        [6, 24, 42],
+        [6, 26, 46],
+        [6, 28, 50],
+        [6, 30, 54],        
+        [6, 32, 58],
+        [6, 34, 62],
+        [6, 26, 46, 66],
+        [6, 26, 48, 70],
+        [6, 26, 50, 74],
+        [6, 30, 54, 78],
+        [6, 30, 56, 82],
+        [6, 30, 58, 86],
+        [6, 34, 62, 90],
+        [6, 28, 50, 72, 94],
+        [6, 26, 50, 74, 98],
+        [6, 30, 54, 78, 102],
+        [6, 28, 54, 80, 106],
+        [6, 32, 58, 84, 110],
+        [6, 30, 58, 86, 114],
+        [6, 34, 62, 90, 118],
+        [6, 26, 50, 74, 98, 122],
+        [6, 30, 54, 78, 102, 126],
+        [6, 26, 52, 78, 104, 130],
+        [6, 30, 56, 82, 108, 134],
+        [6, 34, 60, 86, 112, 138],
+        [6, 30, 58, 86, 114, 142],
+        [6, 34, 62, 90, 118, 146],
+        [6, 30, 54, 78, 102, 126, 150],
+        [6, 24, 50, 76, 102, 128, 154],
+        [6, 28, 54, 80, 106, 132, 158],
+        [6, 32, 58, 84, 110, 136, 162],
+        [6, 26, 54, 82, 110, 138, 166],
+        [6, 30, 58, 86, 114, 142, 170]
+    ],
+
+    G15 : (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0),
+    G18 : (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0),
+    G15_MASK : (1 << 14) | (1 << 12) | (1 << 10)    | (1 << 4) | (1 << 1),
+
+    getBCHTypeInfo : function(data) {
+        var d = data << 10;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) >= 0) {
+            d ^= (QRUtil.G15 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) ) );    
+        }
+        return ( (data << 10) | d) ^ QRUtil.G15_MASK;
+    },
+
+    getBCHTypeNumber : function(data) {
+        var d = data << 12;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) >= 0) {
+            d ^= (QRUtil.G18 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) ) );    
+        }
+        return (data << 12) | d;
+    },
+
+    getBCHDigit : function(data) {
+
+        var digit = 0;
+
+        while (data !== 0) {
+            digit++;
+            data >>>= 1;
+        }
+
+        return digit;
+    },
+
+    getPatternPosition : function(typeNumber) {
+        return QRUtil.PATTERN_POSITION_TABLE[typeNumber - 1];
+    },
+
+    getMask : function(maskPattern, i, j) {
+        
+        switch (maskPattern) {
+            
+        case QRMaskPattern.PATTERN000 : return (i + j) % 2 === 0;
+        case QRMaskPattern.PATTERN001 : return i % 2 === 0;
+        case QRMaskPattern.PATTERN010 : return j % 3 === 0;
+        case QRMaskPattern.PATTERN011 : return (i + j) % 3 === 0;
+        case QRMaskPattern.PATTERN100 : return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 === 0;
+        case QRMaskPattern.PATTERN101 : return (i * j) % 2 + (i * j) % 3 === 0;
+        case QRMaskPattern.PATTERN110 : return ( (i * j) % 2 + (i * j) % 3) % 2 === 0;
+        case QRMaskPattern.PATTERN111 : return ( (i * j) % 3 + (i + j) % 2) % 2 === 0;
+
+        default :
+            throw new Error("bad maskPattern:" + maskPattern);
+        }
+    },
+
+    getErrorCorrectPolynomial : function(errorCorrectLength) {
+
+        var a = new QRPolynomial([1], 0);
+
+        for (var i = 0; i < errorCorrectLength; i++) {
+            a = a.multiply(new QRPolynomial([1, QRMath.gexp(i)], 0) );
+        }
+
+        return a;
+    },
+
+    getLengthInBits : function(mode, type) {
+
+        if (1 <= type && type < 10) {
+
+            // 1 - 9
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 10;
+            case QRMode.MODE_ALPHA_NUM  : return 9;
+            case QRMode.MODE_8BIT_BYTE  : return 8;
+            case QRMode.MODE_KANJI      : return 8;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else if (type < 27) {
+
+            // 10 - 26
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 12;
+            case QRMode.MODE_ALPHA_NUM  : return 11;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 10;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else if (type < 41) {
+
+            // 27 - 40
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 14;
+            case QRMode.MODE_ALPHA_NUM  : return 13;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 12;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else {
+            throw new Error("type:" + type);
+        }
+    },
+
+    getLostPoint : function(qrCode) {
+        
+        var moduleCount = qrCode.getModuleCount();
+        var lostPoint = 0;
+        var row = 0; 
+        var col = 0;
+
+        
+        // LEVEL1
+        
+        for (row = 0; row < moduleCount; row++) {
+
+            for (col = 0; col < moduleCount; col++) {
+
+                var sameCount = 0;
+                var dark = qrCode.isDark(row, col);
+
+                for (var r = -1; r <= 1; r++) {
+
+                    if (row + r < 0 || moduleCount <= row + r) {
+                        continue;
+                    }
+
+                    for (var c = -1; c <= 1; c++) {
+
+                        if (col + c < 0 || moduleCount <= col + c) {
+                            continue;
+                        }
+
+                        if (r === 0 && c === 0) {
+                            continue;
+                        }
+
+                        if (dark === qrCode.isDark(row + r, col + c) ) {
+                            sameCount++;
+                        }
+                    }
+                }
+
+                if (sameCount > 5) {
+                    lostPoint += (3 + sameCount - 5);
+                }
+            }
+        }
+
+        // LEVEL2
+
+        for (row = 0; row < moduleCount - 1; row++) {
+            for (col = 0; col < moduleCount - 1; col++) {
+                var count = 0;
+                if (qrCode.isDark(row,     col    ) ) count++;
+                if (qrCode.isDark(row + 1, col    ) ) count++;
+                if (qrCode.isDark(row,     col + 1) ) count++;
+                if (qrCode.isDark(row + 1, col + 1) ) count++;
+                if (count === 0 || count === 4) {
+                    lostPoint += 3;
+                }
+            }
+        }
+
+        // LEVEL3
+
+        for (row = 0; row < moduleCount; row++) {
+            for (col = 0; col < moduleCount - 6; col++) {
+                if (qrCode.isDark(row, col) && 
+                        !qrCode.isDark(row, col + 1) && 
+                         qrCode.isDark(row, col + 2) && 
+                         qrCode.isDark(row, col + 3) && 
+                         qrCode.isDark(row, col + 4) && 
+                        !qrCode.isDark(row, col + 5) && 
+                         qrCode.isDark(row, col + 6) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount - 6; row++) {
+                if (qrCode.isDark(row, col) &&
+                        !qrCode.isDark(row + 1, col) &&
+                         qrCode.isDark(row + 2, col) &&
+                         qrCode.isDark(row + 3, col) &&
+                         qrCode.isDark(row + 4, col) &&
+                        !qrCode.isDark(row + 5, col) &&
+                         qrCode.isDark(row + 6, col) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+
+        // LEVEL4
+        
+        var darkCount = 0;
+
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount; row++) {
+                if (qrCode.isDark(row, col) ) {
+                    darkCount++;
+                }
+            }
+        }
+        
+        var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+        lostPoint += ratio * 10;
+
+        return lostPoint;       
+    }
+
+};
+
+module.exports = QRUtil;
+
+};
+modules['QRCode']=function(require,module,exports){
+//---------------------------------------------------------------------
+// QRCode for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//   http://www.opensource.org/licenses/mit-license.php
+//
+// The word "QR Code" is registered trademark of 
+// DENSO WAVE INCORPORATED
+//   http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+// Modified to work in node for this project (and some refactoring)
+//---------------------------------------------------------------------
+
+var QR8bitByte = require('./QR8bitByte');
+var QRUtil = require('./QRUtil');
+var QRPolynomial = require('./QRPolynomial');
+var QRRSBlock = require('./QRRSBlock');
+var QRBitBuffer = require('./QRBitBuffer');
+
+function QRCode(typeNumber, errorCorrectLevel) {
+	this.typeNumber = typeNumber;
+	this.errorCorrectLevel = errorCorrectLevel;
+	this.modules = null;
+	this.moduleCount = 0;
+	this.dataCache = null;
+	this.dataList = [];
+}
+
+QRCode.prototype = {
+	
+	addData : function(data) {
+		var newData = new QR8bitByte(data);
+		this.dataList.push(newData);
+		this.dataCache = null;
+	},
+	
+	isDark : function(row, col) {
+		if (row < 0 || this.moduleCount <= row || col < 0 || this.moduleCount <= col) {
+			throw new Error(row + "," + col);
+		}
+		return this.modules[row][col];
+	},
+
+	getModuleCount : function() {
+		return this.moduleCount;
+	},
+	
+	make : function() {
+		// Calculate automatically typeNumber if provided is < 1
+		if (this.typeNumber < 1 ){
+			var typeNumber = 1;
+			for (typeNumber = 1; typeNumber < 40; typeNumber++) {
+				var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, this.errorCorrectLevel);
+
+				var buffer = new QRBitBuffer();
+				var totalDataCount = 0;
+				for (var i = 0; i < rsBlocks.length; i++) {
+					totalDataCount += rsBlocks[i].dataCount;
+				}
+
+				for (var x = 0; x < this.dataList.length; x++) {
+					var data = this.dataList[x];
+					buffer.put(data.mode, 4);
+					buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+					data.write(buffer);
+				}
+				if (buffer.getLengthInBits() <= totalDataCount * 8)
+					break;
+			}
+			this.typeNumber = typeNumber;
+		}
+		this.makeImpl(false, this.getBestMaskPattern() );
+	},
+	
+	makeImpl : function(test, maskPattern) {
+		
+		this.moduleCount = this.typeNumber * 4 + 17;
+		this.modules = new Array(this.moduleCount);
+		
+		for (var row = 0; row < this.moduleCount; row++) {
+			
+			this.modules[row] = new Array(this.moduleCount);
+			
+			for (var col = 0; col < this.moduleCount; col++) {
+				this.modules[row][col] = null;//(col + row) % 3;
+			}
+		}
+	
+		this.setupPositionProbePattern(0, 0);
+		this.setupPositionProbePattern(this.moduleCount - 7, 0);
+		this.setupPositionProbePattern(0, this.moduleCount - 7);
+		this.setupPositionAdjustPattern();
+		this.setupTimingPattern();
+		this.setupTypeInfo(test, maskPattern);
+		
+		if (this.typeNumber >= 7) {
+			this.setupTypeNumber(test);
+		}
+	
+		if (this.dataCache === null) {
+			this.dataCache = QRCode.createData(this.typeNumber, this.errorCorrectLevel, this.dataList);
+		}
+	
+		this.mapData(this.dataCache, maskPattern);
+	},
+
+	setupPositionProbePattern : function(row, col)  {
+		
+		for (var r = -1; r <= 7; r++) {
+			
+			if (row + r <= -1 || this.moduleCount <= row + r) continue;
+			
+			for (var c = -1; c <= 7; c++) {
+				
+				if (col + c <= -1 || this.moduleCount <= col + c) continue;
+				
+				if ( (0 <= r && r <= 6 && (c === 0 || c === 6) ) || 
+                     (0 <= c && c <= 6 && (r === 0 || r === 6) ) || 
+                     (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+					this.modules[row + r][col + c] = true;
+				} else {
+					this.modules[row + r][col + c] = false;
+				}
+			}		
+		}		
+	},
+	
+	getBestMaskPattern : function() {
+	
+		var minLostPoint = 0;
+		var pattern = 0;
+	
+		for (var i = 0; i < 8; i++) {
+			
+			this.makeImpl(true, i);
+	
+			var lostPoint = QRUtil.getLostPoint(this);
+	
+			if (i === 0 || minLostPoint >  lostPoint) {
+				minLostPoint = lostPoint;
+				pattern = i;
+			}
+		}
+	
+		return pattern;
+	},
+	
+	createMovieClip : function(target_mc, instance_name, depth) {
+	
+		var qr_mc = target_mc.createEmptyMovieClip(instance_name, depth);
+		var cs = 1;
+	
+		this.make();
+
+		for (var row = 0; row < this.modules.length; row++) {
+			
+			var y = row * cs;
+			
+			for (var col = 0; col < this.modules[row].length; col++) {
+	
+				var x = col * cs;
+				var dark = this.modules[row][col];
+			
+				if (dark) {
+					qr_mc.beginFill(0, 100);
+					qr_mc.moveTo(x, y);
+					qr_mc.lineTo(x + cs, y);
+					qr_mc.lineTo(x + cs, y + cs);
+					qr_mc.lineTo(x, y + cs);
+					qr_mc.endFill();
+				}
+			}
+		}
+		
+		return qr_mc;
+	},
+
+	setupTimingPattern : function() {
+		
+		for (var r = 8; r < this.moduleCount - 8; r++) {
+			if (this.modules[r][6] !== null) {
+				continue;
+			}
+			this.modules[r][6] = (r % 2 === 0);
+		}
+	
+		for (var c = 8; c < this.moduleCount - 8; c++) {
+			if (this.modules[6][c] !== null) {
+				continue;
+			}
+			this.modules[6][c] = (c % 2 === 0);
+		}
+	},
+	
+	setupPositionAdjustPattern : function() {
+	
+		var pos = QRUtil.getPatternPosition(this.typeNumber);
+		
+		for (var i = 0; i < pos.length; i++) {
+		
+			for (var j = 0; j < pos.length; j++) {
+			
+				var row = pos[i];
+				var col = pos[j];
+				
+				if (this.modules[row][col] !== null) {
+					continue;
+				}
+				
+				for (var r = -2; r <= 2; r++) {
+				
+					for (var c = -2; c <= 2; c++) {
+					
+						if (Math.abs(r) === 2 || 
+                            Math.abs(c) === 2 ||
+                            (r === 0 && c === 0) ) {
+							this.modules[row + r][col + c] = true;
+						} else {
+							this.modules[row + r][col + c] = false;
+						}
+					}
+				}
+			}
+		}
+	},
+	
+	setupTypeNumber : function(test) {
+	
+		var bits = QRUtil.getBCHTypeNumber(this.typeNumber);
+        var mod;
+	
+		for (var i = 0; i < 18; i++) {
+			mod = (!test && ( (bits >> i) & 1) === 1);
+			this.modules[Math.floor(i / 3)][i % 3 + this.moduleCount - 8 - 3] = mod;
+		}
+	
+		for (var x = 0; x < 18; x++) {
+			mod = (!test && ( (bits >> x) & 1) === 1);
+			this.modules[x % 3 + this.moduleCount - 8 - 3][Math.floor(x / 3)] = mod;
+		}
+	},
+	
+	setupTypeInfo : function(test, maskPattern) {
+	
+		var data = (this.errorCorrectLevel << 3) | maskPattern;
+		var bits = QRUtil.getBCHTypeInfo(data);
+        var mod;
+	
+		// vertical		
+		for (var v = 0; v < 15; v++) {
+	
+			mod = (!test && ( (bits >> v) & 1) === 1);
+	
+			if (v < 6) {
+				this.modules[v][8] = mod;
+			} else if (v < 8) {
+				this.modules[v + 1][8] = mod;
+			} else {
+				this.modules[this.moduleCount - 15 + v][8] = mod;
+			}
+		}
+	
+		// horizontal
+		for (var h = 0; h < 15; h++) {
+	
+			mod = (!test && ( (bits >> h) & 1) === 1);
+			
+			if (h < 8) {
+				this.modules[8][this.moduleCount - h - 1] = mod;
+			} else if (h < 9) {
+				this.modules[8][15 - h - 1 + 1] = mod;
+			} else {
+				this.modules[8][15 - h - 1] = mod;
+			}
+		}
+	
+		// fixed module
+		this.modules[this.moduleCount - 8][8] = (!test);
+	
+	},
+	
+	mapData : function(data, maskPattern) {
+		
+		var inc = -1;
+		var row = this.moduleCount - 1;
+		var bitIndex = 7;
+		var byteIndex = 0;
+		
+		for (var col = this.moduleCount - 1; col > 0; col -= 2) {
+	
+			if (col === 6) col--;
+	
+			while (true) {
+	
+				for (var c = 0; c < 2; c++) {
+					
+					if (this.modules[row][col - c] === null) {
+						
+						var dark = false;
+	
+						if (byteIndex < data.length) {
+							dark = ( ( (data[byteIndex] >>> bitIndex) & 1) === 1);
+						}
+	
+						var mask = QRUtil.getMask(maskPattern, row, col - c);
+	
+						if (mask) {
+							dark = !dark;
+						}
+						
+						this.modules[row][col - c] = dark;
+						bitIndex--;
+	
+						if (bitIndex === -1) {
+							byteIndex++;
+							bitIndex = 7;
+						}
+					}
+				}
+								
+				row += inc;
+	
+				if (row < 0 || this.moduleCount <= row) {
+					row -= inc;
+					inc = -inc;
+					break;
+				}
+			}
+		}
+		
+	}
+
+};
+
+QRCode.PAD0 = 0xEC;
+QRCode.PAD1 = 0x11;
+
+QRCode.createData = function(typeNumber, errorCorrectLevel, dataList) {
+	
+	var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel);
+	
+	var buffer = new QRBitBuffer();
+	
+	for (var i = 0; i < dataList.length; i++) {
+		var data = dataList[i];
+		buffer.put(data.mode, 4);
+		buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+		data.write(buffer);
+	}
+
+	// calc num max data.
+	var totalDataCount = 0;
+	for (var x = 0; x < rsBlocks.length; x++) {
+		totalDataCount += rsBlocks[x].dataCount;
+	}
+
+	if (buffer.getLengthInBits() > totalDataCount * 8) {
+		throw new Error("code length overflow. (" + 
+            buffer.getLengthInBits() + 
+            ">" +  
+            totalDataCount * 8 + 
+            ")");
+	}
+
+	// end code
+	if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+		buffer.put(0, 4);
+	}
+
+	// padding
+	while (buffer.getLengthInBits() % 8 !== 0) {
+		buffer.putBit(false);
+	}
+
+	// padding
+	while (true) {
+		
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD0, 8);
+		
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD1, 8);
+	}
+
+	return QRCode.createBytes(buffer, rsBlocks);
+};
+
+QRCode.createBytes = function(buffer, rsBlocks) {
+
+	var offset = 0;
+	
+	var maxDcCount = 0;
+	var maxEcCount = 0;
+	
+	var dcdata = new Array(rsBlocks.length);
+	var ecdata = new Array(rsBlocks.length);
+	
+	for (var r = 0; r < rsBlocks.length; r++) {
+
+		var dcCount = rsBlocks[r].dataCount;
+		var ecCount = rsBlocks[r].totalCount - dcCount;
+
+		maxDcCount = Math.max(maxDcCount, dcCount);
+		maxEcCount = Math.max(maxEcCount, ecCount);
+		
+		dcdata[r] = new Array(dcCount);
+		
+		for (var i = 0; i < dcdata[r].length; i++) {
+			dcdata[r][i] = 0xff & buffer.buffer[i + offset];
+		}
+		offset += dcCount;
+		
+		var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+		var rawPoly = new QRPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+		var modPoly = rawPoly.mod(rsPoly);
+		ecdata[r] = new Array(rsPoly.getLength() - 1);
+		for (var x = 0; x < ecdata[r].length; x++) {
+            var modIndex = x + modPoly.getLength() - ecdata[r].length;
+			ecdata[r][x] = (modIndex >= 0)? modPoly.get(modIndex) : 0;
+		}
+
+	}
+	
+	var totalCodeCount = 0;
+	for (var y = 0; y < rsBlocks.length; y++) {
+		totalCodeCount += rsBlocks[y].totalCount;
+	}
+
+	var data = new Array(totalCodeCount);
+	var index = 0;
+
+	for (var z = 0; z < maxDcCount; z++) {
+		for (var s = 0; s < rsBlocks.length; s++) {
+			if (z < dcdata[s].length) {
+				data[index++] = dcdata[s][z];
+			}
+		}
+	}
+
+	for (var xx = 0; xx < maxEcCount; xx++) {
+		for (var t = 0; t < rsBlocks.length; t++) {
+			if (xx < ecdata[t].length) {
+				data[index++] = ecdata[t][xx];
+			}
+		}
+	}
+
+	return data;
+
+};
+
+module.exports = QRCode;
+
+};
+function req(n){n=n.replace(/^\.\//,'');if(cache[n])return cache[n].exports;var m={exports:{}};cache[n]=m;modules[n](req,m,m.exports);return m.exports;}window.QRCode=req('QRCode');window.QRErrorCorrectLevel=req('QRErrorCorrectLevel');})();
+</script>
+<script>
+const CARDS=[{"v":2,"sid":"730610778","name":"ابا الحسن مرتضى قرطاس غيلان","dept":"","pub":"BAi25/+h5SWfOJWVrfsoP79kfQnXG5svcPF2cpHYcXX+uIuN739x8mDAnmWkrPOdeZorXFTVMo+Mqdmpd2VPuEo=","salt":"VvBDRxepSWH6vNEXxDfZ6Q==","it":200000,"iv":"852L/x7FyfSS/bUl","ct":"YF9tSIQrQA2hP0VSa98NuWF7ozyo89H6gz1JnkxhZgDYcZvnPmVGhjw2BC38JKSNQ+WcruXgkMUQyd1v0KIog6wnxHDolZjGexIP8MYwIxcl0q1/wX7nGJKTouWiYs8NahIU0g2A7nEhgRVGxOYmOsm+3jnujPKAywNomWvNOn08euQVBjK5dZMp9EtgOeoOAu/bGsGV6eqZ6A=="},{"v":2,"sid":"500147782","name":"ابراهيم سالم جبر حميد","dept":"","pub":"BByPFW9NIYUprUq0Asorh9AAU/b1NHMvpH1Ik74v4hD3KhBe/ODW/+d8mQOPvLSN3TNyb8Y8xVF3nuVXHlViWPg=","salt":"SXbsSU9we3BgmJQNy5tS9Q==","it":200000,"iv":"UUAnZJvraU0CBRKn","ct":"IxgWNDZ25BOKizNqh6LHI/iJ2Kwj/GYmZbDFW3ocsMYXCOAd1WFAXWFDYjTvjEb8wXo2Ak/2YBw94J3waWq6NEo/ffjPuR9FB/GgHA6xyZ6+lmqWsNjq+yQAYDhUlwcKO3pKpfZtOjOXQMX3hoxGa0Ej2q0JJLUp6X4WrPOogdJdRXZoeY6JhN9JwikyjsgKDiTAcaOHtA702Q=="},{"v":2,"sid":"566808238","name":"احمد زایر محسن ایدیم","dept":"","pub":"BLdJwMOKrQHC4/EMSFyyjHjqvDqgCjYvYyPRQZkyQxhzY64a+6k+ypMSE8e+ltONUhYHS5RemKYJK90x//+AKHo=","salt":"WTGzTL0h4IO2MSuc73DXSg==","it":200000,"iv":"PhfEVYcHHidasp2I","ct":"1UzvAamaTPNAtHch0S1pMD2grN4Qwj7DqLZ/9fW4TRu4XP+gmuQdiE/FXt0Xu/NkwcpWNPpEHk1PALSVLQJ12w+BydIy/UZZ+FRlIsKzkfqIs0UhwMiHJibGubsVv7vZ9hxVkUISv7xTPH5Wtpw/rGXreXoT7nsf4HmWmkcHJvF9YJUUAO13st30sDFLuBIySGxkGklC7kxPbg=="},{"v":2,"sid":"468743530","name":"احمد سعد جبار احمد","dept":"","pub":"BIN0nT0K/vk3GBapaX50iUChLUywOz0VERMCYCBg4RfKu7DPoP8FTW29DjEpUKytfSAm+9PnuIKIhZkFwDSfpp8=","salt":"rmf6THq7FZJXSa3pyC6Slg==","it":200000,"iv":"yt948El3kevLSKIy","ct":"o8kyH7xFWAHnG4wgyF1F8ADW9Ohy1z4B1leZ/dSw2yp/rOCuKKzDmlsxNL3nS9hWDjPBqA1AyRfwUYyr0cStd7UD6KV/7BYVhKZjPIXsEpbvfLnYCGECg6qghpfZOBQ4ElP9ZjbqkiSCdO0Bon8rgP1uBBb8EvE/r/P27Fx7P3drRK1WSfH2rmb8jUOBwbhhMJLwFFpB5gFnWQ=="},{"v":2,"sid":"510637711","name":"احمد عادل عزیز نعمه","dept":"","pub":"BOGkNFfAGI2ze5s6zPR/kMNtUhPoVrSdfrivRLweBv7925ngfASwrzg0E/eo6gEPMZPeTJIog3GfytMf9Hphebk=","salt":"MHkyjg73nKHSfdoZux+JZw==","it":200000,"iv":"ENCfxrdM/GNkY9go","ct":"dem8ScO4TAn1bzV8x2tmUHxKm1zZ+5EVixN61xB70DiuseZn3kTm6sVbPO7jRTDSSOguaRbyTXnIZluTlhOJjhbXME1CbHk1KEU5elFjNVuei1Z6qfV8n+/UqqE+4qjP8J5TMEm90Qxm96BqXvZ4D6HtWIApIclSCrFZyMobb22UM8ZhQGcWrGKMN0CNeLAEYnh7tanqf8YpWw=="},{"v":2,"sid":"751392517","name":"احمد عبد الحسن حمدان کاظم","dept":"","pub":"BAJnOElvk0hQqPuERnhy4R+RrPPyuOJyRHPbNbP3g+DtKhv8HWnooN7gdofCabeV2Z+AvZxTf/jzkkLS9euJQhc=","salt":"IhlKgCaIAqntU2MEP4Fh5w==","it":200000,"iv":"d6yyf/znAcLC414I","ct":"q7/zYw6GIOOGUbWSMmp1DScbQDVH0s0+qD9VtkMulxB9lVoWuCs0RA4YJb8SEU5C444kqH8andw6Ey0C8x7QNLjqMokVADvu4gdP1CtxI27TrBF5O/SI0vNDsmK8AM77WD2aaCxW9ZaiLyQiIUg0+Rgo5MbonosdKN2x3eLSXEaPkm/3d5l+Kva9foDJMAHTpjVbzJhjIBjELQ=="},{"v":2,"sid":"611436312","name":"احمد علاء حسين عبود","dept":"","pub":"BOhf89WclS87g/VjjqS+sgQ4NPxQpSgHaKpSz0ISisKqDsYC2lYtcYYiOcV1+7r9bWc/U/l5uBZ0glUxJ/nW3aY=","salt":"95UG5WAcJq+KGo17buC3cQ==","it":200000,"iv":"IMhkC1g2Y9OrgzPq","ct":"ePtJpVOVCHzCf/mo37zS5zpvP26ni5kaqeprAYML18JsfyGTaEtlhJm6aO89xoqYjVqos7tSAUpCh1aQO9YzBjDTvIEQ7l7B//bATDgAsrBdRXpiTpVvZVNz0BUGtSFbLZCIuKiMvXtBcxVdUI1p2/Rj9cI+lgiQeCL70MREsLVZFdqhUfv3qxdkiEiRctoijPj7qP/yjbjbpQ=="},{"v":2,"sid":"495166314","name":"احمد فالح عرار حاجم","dept":"","pub":"BEwfaVeO/hUFU9AhF3DmtQtZtHWDcNgM03gCuVm3WgN98XFoM9tWf7zTZ69pzAG2Q9g2OtSBiZQXbspfxvEUq7o=","salt":"13HwkxN0SUI9nRxMM5YKKQ==","it":200000,"iv":"uZ4ShwPZA9ZFqvlv","ct":"169cAh8zAfnvTG9HE5eHaBTILlO1Ex60JRUMweDJOmG3QuCOlII8OB/JL/5UiHBVQTQXc67YWKLulMQttAZwVK22qi7FRAbCIOF4JqBm2XK/c/rk5pREV2/jAiBqb3tXbhIaN2akC5JKoTw/Dq9xBfTx+5QoyBDnSA3fMbhJRYXBn5M4dkV7/jyjAqpYdWG/0UPrJcqHoMO6pA=="},{"v":2,"sid":"455529031","name":"احمد محمود خلف شبيب","dept":"","pub":"BMsKFSQ/rG8BSd2eqn+pu2dhQPrMROiu185kBQxUYPEQCKBR75f+z838WIcQu8DsrBXJxDLtdbfdKI0Xa7FP9Dw=","salt":"Ja9By+NFRhy25Ek1aDF/Bw==","it":200000,"iv":"rmWirCad1rxK5qCq","ct":"XYksuUmEEUsEACg0/nB5qWQYuDZ297MV7HYQcK1O/zSq2818hFbRHacYs4PP60AxLkzdzIbOYZc8Fqlhe4xXbXxAvFhfLjJjKxOhdkbh0X0SCGhKm4Tq6ZHb0r4JYlI+ZoVAhpeXDIZpqdAMVPAXfg3IoHHIMTW8rGFVOCeD8YvteNBN1fhgw3kG5gKfY/Blw/2sxc8TkPx03A=="},{"v":2,"sid":"360856406","name":"احمد مناف مجید محمد","dept":"","pub":"BGBDURFVCvogvkv47MikDkzGsj7jiU/D6FNVKLHSbHIP1OHye0BkUrMtSgYXfqR3AaX+OnoVR1wbyH4/iF6DSug=","salt":"PQkYlNWNdrHFRGJM8VaRMg==","it":200000,"iv":"M6zlCbut8LtQIey0","ct":"3b9fNPwLWuTGz7c2HXKS7fzJJ5mIFdY+gK7DOoFF9nKVq5bdDpqVvYrVXTfE4cgIL1uOpIwSiU88o/dm49B4CgnqzWwbbPn3nLIRzFA7rXhkk19YjEgqWe1Oosn6Taok26vlkd4Dlz8qHPfeKRWjdqIlZ9Nfs0ccODOvm3h5oqM6g12VqTfjsYlK/yWvFNXcvLDZy3Qz9xbk9Q=="},{"v":2,"sid":"836400149","name":"احمد نصير هاشم وشاله","dept":"","pub":"BJQTRy9WKNpOMP2yjm57TrlpBmYO3IBO+YjdIjRVjKi6zVhSiRDx9Ibpe+d7/+gOSAoeSrIDWWw5oEHV0vq+iK0=","salt":"QdtKbTABB4eq47pE2yHZBg==","it":200000,"iv":"erh3Y+oPWALeDdpa","ct":"6623flLjMeLuXlCa+mWBwmtBZL+4yTfnrL2v0aNncgqDafLrEqDohgxqrfT/o0MWkpPAY8sfrM4WTIX/b6KHeRZRDHeoCtC1Eh0BwLE5asivT8ej6H4G2zddUZXCjhOVfUN63ChFKBWTNHueQvB9m6/ufKIagzzIA0iYgcs4Hj+nsidwB/T5bzmVRICBWE2O0rSysfP4/CFSdA=="},{"v":2,"sid":"205966008","name":"المهدي على ستار جبار","dept":"","pub":"BMzmWaajxH3FY3xk3Xjjmr/ITh8TR6ZwaGHR1F+CNy6zcgHuH0QnOrl2misRmSptOesRVwybuuQjvz2cBdLZkSA=","salt":"BGy99UFpwC9xqSpQfzprSg==","it":200000,"iv":"GdOz4JDl/yebOZ7k","ct":"cNjyIT2CmYX8bwh6BHrNJnOzwSp/vdnaHkXoeO+8jSDMF2hXg8wFCeAnfiB/FU3Pz5UzQDxnw+PtUPHJ36+nkdC3z8QJWEwz+LBTbxjso80s4pFwg5cIJ9CobA06VtgCo96FCuv81CTBPtGIMlRkQTTDgf8g0u4MkkehU+zlk0VzqjW7dAhBBvfGdlIN1IEjZKwG9Jw990MXmQ=="},{"v":2,"sid":"450885760","name":"ام البنين حيدر دعير حسناوي","dept":"","pub":"BO75Yz0hFJZk6SqC+tHyp6jRZ/TzS3Oz0MlbuAJyZo7b6kFQ4A+flLko81AZlMAe3MZ4NJkNa+NkTskX6snIiKU=","salt":"nkRPoC0EyRshxdY30zqP1w==","it":200000,"iv":"Lnz+wZcTJTk2EM4Y","ct":"oYvsqsYaSvr7SpyQiT2oxX5tL7uCyQb+pxMBkbeWIr1m1OopeMJNB5GmSSFkYfZe0MSuuSVag60f3apMCrppGv2KKeFHsWb4AOa01NJdUoN1Y12L7gwDNPexWzXlAUfQO+pJzwlv+nyxSRSGMd45+Tp3bYN0e4g4M76ifERJU3Iv9haq39Glb09AuUIseVPIQZbhPnt21nd5PA=="},{"v":2,"sid":"743255904","name":"ام البنين على هدو راضي","dept":"","pub":"BJwQu6hz8lcFmTJKH5mHVtxD5BjfSjOPzBwbKtSaN0DTx4GaEaCCZdeW2aM9hMWGpcHe3MQHNAXbdBApfp4CkQY=","salt":"Ikfa2Vx6Vt9cpJKWpxFwaA==","it":200000,"iv":"cYOva5/Dju5cLWlL","ct":"AmyThPl66uSlHOwf27GV+EGn5PVxBnGth60nsVMPDblvsVkp58IlKPmebasMmqcmGQsL+shufp95KaHlsgyN0xg8957xQ6/FkuAFkMIxY0HYuFz1cbeYwUauF2L/30BVueDEFmE4/c8RRlplQlIlmPXxtzhnOViJj+CWQHbbABjTqLEzWT51k1C4hpnASC7h1ryVYbpxlbnWHg=="},{"v":2,"sid":"398293020","name":"ايهاب عامر نوري مهبش","dept":"","pub":"BOVvFnX1MhOO2YAWZgmOrv+YwauHuEDfMigVtomN7LXjgtPYybE5Y78KoSif2FPm/1GfY4WJe0NofsmmVdlL0ug=","salt":"lMC6cm6fiUyWuC1ol/binA==","it":200000,"iv":"pQBx0/2O/NTjn+ky","ct":"NbiHS/9Hb9+T5gu0u19kGckKJxsNoRp8xBojs0qxaJGFxWi1ebFDGF0uW28wOMWY9XL8u0+N4Kc6HZ3ehdqK7PTy2Q3WJbIX11Q4MvjHTZmtOWwLhoxOqyOz83CghPIhxSTVgS6GBKzDcGq6VJK2FhbeH7DJKDwW+3/tzoukTbxVE8cr7X91hQpGuLwr89LSCC/GDOoanMoSNQ=="},{"v":2,"sid":"217321954","name":"برير عبد الحسن علاوي بدر","dept":"","pub":"BBfRH54nGuwqEqC77REhZTiK63xVdXaJ0KgXwbVhZsx/YYakZqhOLyIHFtzNccikkNobPzdkY71gRQ0KWTBhfZw=","salt":"bcC8isQZHpEr1JOYWPeK1A==","it":200000,"iv":"1vg61TULKUI57Jz+","ct":"ohfA2IjSVHqU5aYe5FPXJV6PdiWIEQ4iRci2fyRxjy4cf8Sa7pdz0ER5RhxEIqzF5Hpggs72NUlFv/CxIOKRNNoFORCvW0BCJZ7ZAEC/2aG62bRKsIF28Dr1GZHQvSkCNOnmlZudsWsL1sZQ3D0hUNHTgFeOxW3vmq6PEeHFkyvf77op2eWB1FBNwfDqHqsIsfF/qVp6heNdRw=="},{"v":2,"sid":"557251885","name":"بنين رعد كاظم عبد الرزاق","dept":"","pub":"BP3lJmH04yJqXVZ98bpeiceAOnNy503A+QU5k2K6FdJ0/nRTMhX0JzdCq2Jhs29+TRmzs6XL5yDGH6IoEW1S8O0=","salt":"fxJiwg8+876Eszxa7b3YJg==","it":200000,"iv":"RHzXhFy6w4s5R+m+","ct":"86AxvOLNFhfT2CiT45Wzn43yCEsjAeBMolCJiLqT23kEGvMvxl+O3WVm57vv7O47N3hcIo1Rru3ZpyWXQ89Rxxi/5nZAIm2X21nTIqq7hZSo3XZtIpipkSdnTXGuJE7CB5Py83/n/Q62IyEu9K6g8QXKKLaYbJBVmQFCDYAvFEuB9FZVFHnu+J9yITm1Nx+vvL9jSuaBw8p+Tg=="},{"v":2,"sid":"305454204","name":"بنين منذر زاير كاظم","dept":"","pub":"BGZbpypltpvC1I5GxgFTqZDSXF2wpsw16swrOG6QYmm8J8wKlriZ9k/G6ac/uUvP1x/AXRVKp/w65s8rWnwB5QU=","salt":"9+suHpuEW1+or+seZmbfcw==","it":200000,"iv":"Z9EZqKRV1a22diey","ct":"SonKFRbXuY53z3cR7QciMrPtlsF5DjfOB3zZaqrdOCw39In1MoADnxpMvLm69ZMxIjKeO4BcrpL0PaPS2yLWOak4qja+LAP3HRJHQxvclBMRs0pn13SaYHR0AuIifNbS/EA8kxyZOAgFCYSlnKnYWLfvgDeQ1HJBiM8PQUOZTdjdjHLmPkcICLpDjaoGJkVhzo9d/sFu2PhCRA=="},{"v":2,"sid":"746129428","name":"تبارك عبد الستار عبد الجبار منعم","dept":"","pub":"BB5qcVPOZTd06fO36GVmf2Caxuaaagkyz8MN6l76ahtRyUXvl98eKXVVxJDX+zHSJ+lVnNBQmA8090qS1Q/HCzw=","salt":"nPaiPtRH3l2ueWX9FMAfHw==","it":200000,"iv":"nk42DOj+NRDWRexp","ct":"Kwphe162fyBn1/Nxee3XTZmVPSpTiUF/FMd5OQnvEg24T5xBye2NfK5WmzzFJant37sskN9rR/1Mbq/z0zyIVutO1CHIoVyTastXjOfLoYbLj1izBHWM6aSv9hXjdCHZj6FcHeqxj1Qf8MRTh9fOuPJi1UGgl8GqbKkvuWlqRsvuABDy9Layedck8lx+RnfPiy2vXyCnNcka2w=="},{"v":2,"sid":"886957354","name":"جعفر صادق سلام حسون","dept":"","pub":"BHSgR5GSG67Ja9NbGPaTCunE1447s0fSdEuiDmejh20/xU2kBFAAXgtXgJ2QMBrQ+dpkmSmGkX6maH9Zw0B5nms=","salt":"gDZYBLXASKWyqmupBtBMqA==","it":200000,"iv":"lQv0w5tnKZrQ4mro","ct":"44zQRMVl59+CjCrgoOHui1eHKjS0aGaHPEtJSNtaO8GOmW9+Qh/D4s7UwBidL3fj98u/FOgJyeA9LnXGCfP9vdJZg+wGz7oEslkjWqbz259RIf9XWjOwYXPF3xyACkRUNq2TaF2D468DuFtT0skoKwb7mmU/SwG7uz2fSVuiRRRO3YBr+5w2HbTlF9nz+TkqKogSWRUkIeHmHA=="},{"v":2,"sid":"519369053","name":"جعفر على عبد الكاظم كريم","dept":"","pub":"BAysOEYt27DKwcztEpMaQ5EFuC6holiKfNe/JQB8gStWyZFDT/9tiI92ESzOYc/aMjCn/c6LcxvfcN1JZam4oKY=","salt":"LMakkrYtySJWruuY+5WmXA==","it":200000,"iv":"WyX8WT/KVVGsw4n/","ct":"DUu0HyPQOIW4SKWXzkqWI7iTu33hDwOC6gl3j0Md2MwxSXW5IqRTDE9zM5XPRsjYx5cIwOD4j2Ykbs1FFfVMsZ0PAAmMsM6Nffd12eXD4oqwi7vQkwUmAfgp4Ke/TbxMRUlD7FnCfakrOEO94SiEvwvXcuHkA7Coxej4bIWEkenA3zuxUqCWZ6gI8pSVDGBh1tlUOSDvXDeIVQ=="},{"v":2,"sid":"496462060","name":"حسن على زغير خنجر","dept":"","pub":"BMej7NXU8XvrR/FeppAF2vhWntrjpWxsGy7neznp7EbNigA6g85pzOuBkn4EIFnZGcMQ2ta8leficq9GEa8Ux5A=","salt":"NC8tycKhwEbDEbVYb/8puQ==","it":200000,"iv":"ELIpzSMljrHsbPpM","ct":"x8GcgZznZzYApz7d9MbGFngH61ovMygd+Ux1IX6PgI1YrgDQr1iUbaWnFffHvR2rgZ15gX8jD/eUd976cqR1CWkmGfmsoiP04uEFWv5SoTc3gX9c45ARgF38Xv/4n2RVw9hifUxlbLLMSSNK2BtL11lyXH6raKBZRVh/2AoTqp44ILkYSrlApb7NFzKEfWr63hdIRc4ERmfUSQ=="},{"v":2,"sid":"816480607","name":"حسن على عباس خريجوري","dept":"","pub":"BK2i5Ddmh823qxrJiHRG69x8uGcRESXrgBz1X5korfNKJu6BV2bPxKl1b73jyv+xf0/LkQSzNojX5qD0DQSL38g=","salt":"VHajUYRD5bHMpp2U3iq8bQ==","it":200000,"iv":"jQb0NyFVuWAVmsX8","ct":"g27VIeh6bxZ2TQk35BaNQLMoG3zIbXnuwuOe3Z0iTu7FYOON3wh3+1jYcX/3wOWNJ1LuF1mtgBb4Oex+PzhgfVcHw9l6d67/V17DA5VSQw/ZBojx1ngXebdkbHcBI+f+nQ5PQVQvj2QjHhPhkdiqjfwF5xZ7dOatqugBM853VXQIqqx1GxSuPW7BzhChRhMky3IE4uhx5iB6+g=="},{"v":2,"sid":"742723172","name":"حسن كاظم بداي حسن","dept":"","pub":"BFMVQh0X9H7swO5XZ6u1SUQ3ZslMJF1QAa/v6vxAQwr26KIC+3dLS5zasydecKpyJjidw1Yiofuz0UqNjpm49gM=","salt":"bkFv1JN4NeQJLC4Pxe5waw==","it":200000,"iv":"uIdqLfcukleQrfY4","ct":"kUthzPQ9XUwZczoFJPB5GCwPbaOhydNO0hlkZqS7XZOauJ2g2SarZJ2vtZHy7JaDRqBRy835J6i9KW5OVW2lif5pJPOkl0m07fzVO98V3honTpjvNvwa0ePeIHs6yiHvxbysmUnIVGdug+C7hkZdQaUXJ7HevqkKP8v8mQo2MMfcre8azVdDhL3AC445ghFnfEThCACVUis2Yg=="},{"v":2,"sid":"865678843","name":"حسن هادي كاظم احمد","dept":"","pub":"BORmToQvaQU43DeJ6oZA+uUyX2MqUhArRZyEO/g4kstPB2izkZ+26sFSHrUoJeNgQ3efpiPxldU24mDgH4gQozY=","salt":"8y5CNHCjdEmkkJ6T+yfuhw==","it":200000,"iv":"ooCTaJC84p9MJuGq","ct":"VeLBLYUpXRYpMCV+DexWotcZJ2j78EQwa14mARG/YW9RcS5BGcsNP80WISmJkJ/D35MQipfRfdybyCASiabi3EM6RIJ6odZ921axyt/NWERROP/psrL6Sw46spNpdJptuAYh5dXBILVbSqckPHQwMVxLl3dnRGXt9b3c0bZVkzMSfFPvtNX5WsmYuPYBeQmwuX4H/XSdQhbLkQ=="},{"v":2,"sid":"727638774","name":"حسين رشيد عودة معارج","dept":"","pub":"BN37FkUYOw3GMpYKxMJsESuBYWn2cZTk3mt80dX6TqfrV/OtK1iKyWMZqqSxCkW/fEYVYy4QUzXhL8mT2hntcLU=","salt":"vw0586iDpuerPEvYLvy81g==","it":200000,"iv":"I24QykoeFMHqzyQb","ct":"sNgkCjmbPEzCChAJFGymqbETNcz5bBIYZZhlrBJ75ZrtZ4c+VajAa0Zakv11DQNqPQw8TbRyzL1icO9SMfiEg+C0GXZ8iFyx6T0ONwWq6peNmEfDSF47UUjiLgdyo3J10GdGSUwx57/cGYdOSxfhaLh3vzfJCt/EkGN47RuztTvljLOcJ5E/QMcCv+Tx7nXlN2abypiF9g+irQ=="},{"v":2,"sid":"534963150","name":"حسين على دعسان دنبوس","dept":"","pub":"BKLAo8huRz+VLJNII+dmkTgrp6ARr2br6s8b9v3TyTOZ7UZGj/ZduVs6dQXMC9e0imWTu/ByqpyREZj10+MbsWc=","salt":"Z3gqWuvrHdVX2KMHGhpDLQ==","it":200000,"iv":"V3K/MRPEbbCoCkBV","ct":"fF9NcVVGAZZnIBcCCR5scw3hmNVUTCLs3WizykbjPB0tlnhF00UCOKt4Z21UoqV332Ji9CCEgxe3cF6DE3RVMRQ3Y18RVd5Rg/UuVUwtRrJ+yNSaAauA3l/Jk8NRs8LDStK6WdSTdpp9/EdmyRsD0aUAVSRa2++zCumdLteUvDbMPBtJQYbx8wmyAB2G9IO9h0FmW2Fq264wvA=="},{"v":2,"sid":"836792759","name":"حسين على محمود كاظم","dept":"","pub":"BKvGS6cuDfcYxCmWot7TAYQDU+a/oJTSH7bx2W85kqRH14c6at3WFGKz2JgIns5pPAx9z3632jBNYkbmCuFGDp4=","salt":"KmLomoGMyc00+sEvlEymww==","it":200000,"iv":"Ay0XzBdG4Fuww1zl","ct":"Ve85lEiQq28mCWnIGICm7tc9il4dIY+ocpJBgbhoyYXv1GqOIzD+ULkStz9l2WRIWSOyhi8L7xy/wN8ZgEzqlSqG/HBgWOfrHB4qs1TGc9wgGv1+kuWHPhYGoEU659jG2/jQSjwrDIFNXbOgkMM8FrrmW86TcTItu/ACezyY4uSShvgdpdzqpADdCZ3Rc2Du2ZgmJMkN051U/Q=="},{"v":2,"sid":"407969730","name":"حوراء نجم عبد العباس عناد","dept":"","pub":"BO76jC4bRa8jPVN9JUPxIwCFbNUrusBT91b8qKgkDpoPi+tl0HLkulNcGJJYOla50P5QLADsWonQLScEJKaCCEQ=","salt":"4rUlZsO4JkxZjuwbxEFg4A==","it":200000,"iv":"b0ncvbuMMSFeA6C4","ct":"T3RgN8Ndkqp9DIftmMdVjS+O2xnmuOFFsJY4dP2KElbGr91QwgFqM3MKSvKRyfCoEBWM4phC87X22ZGkqs9JvG2+gJ98HS8NKuqn2eEIcGjNPaHWVNNg8/4OVO88wASLdqJojEOn+Hh9bRGRaNVY4c0bb57TLveZ+OD+Ex4Mf+k8T6BHz9LSnPr1L48UPG2dEqhxXFLY+kEeMA=="},{"v":2,"sid":"441654165","name":"حيدر فلاح عدنان عبد الكريم","dept":"","pub":"BFiwvTDNvIe6mMEnjXAV+1tf94ZTyZcqzXOhaeqdNWbAAJeM7bh3LM6RxfnyfqLCqtSIxet3bI8izqvaUNiloUQ=","salt":"x7TzGqERhiTlHEL+5ltqKA==","it":200000,"iv":"IUwqxOqD62QfCw4t","ct":"V/xLsAYxcV3v8JmmunJD8IS00oCjo/0cwp6AYrVaTUeg0SmVaijbnQhMIY4UZqE8sO5KqADmpPg6bRN6o03ypTd+TJHJKr8eLg288u09L4UHU2sRO2loP1IfuohDPzt/n3xUZdDhn/wH2dopvE8PJi5szHHLfJ9m62Z//esLX5thfJtwQ9hZ1oVcMSfuleaIVY3c8fnDKMglyw=="},{"v":2,"sid":"108180828","name":"حيدر محمد سامي خضير","dept":"","pub":"BOFVg10gdVzp0dFdVBtZlXY6x/8/VbZG0EZ7K3YZxUeow7K5a4GEJJnhDNWD9dtW5nqJ7m+XTUWiayztsInhI8I=","salt":"IfiSwyJR1yFbce7etkXx0Q==","it":200000,"iv":"OBn8uJ26XUSYXPq4","ct":"ttBjTDi6yUFTHt1Qlsvelh9MWCgVp2o2SIqkurHPJBx4FoR6UNxXoFtad6Z7jc1EJG+ZvGmEGKuUvq0AsFG0nsbu4Zq6Fs05Hv43N6VYNOtqvbz3XLXre2pYENRzMhRFaFsKFKWBojVDjyQQjX7u8iNY7FTUHvBoK4pyaBQgh5hO4JP88M3nmMecSgF+MAVKAYJcUi5D6F3Gow=="},{"v":2,"sid":"300050970","name":"حيدر مشرق عبد على شنيشل","dept":"","pub":"BCgP1YGC37xJH4ES1rI0Yr/8v0DQhIFcTVuZWNlyjKyD1MowIGRA+iCHvYIRpkitzuPxluSyUq7vpuzLfEWsBUU=","salt":"ojYtU1oFBYrTTxucBqBowg==","it":200000,"iv":"MxSTQCqcI1CUMfrx","ct":"nqwYMKIe98ASvth7pVVUQXjETTgur+yHHSqXE7B4/RTrATXPxzRIBWdN4bidczo6HX2hWgWyVt4tZTMO3qGgNcJPzpGfH8h4kaq+k1/d3aPk1zHnIaBOVo9pSlTrjaMC4hJHqx/QN3lFmpsqVTxfY29Jzjry1FjBwGMLokFr60wXRrznt/OQ9pu7XYoTRTVEyOH4bh2E2QNqpw=="},{"v":2,"sid":"301752681","name":"دیلان جابر حنون حسون","dept":"","pub":"BD/h8Ch4rYtyVuErHahAo/uTwVzkB41Dht0FOH2PjxUyK+H25FeE5RW22/Pu0/g5FGjZFkoGpkvUeL6QghzLab8=","salt":"j9sUR2jZ8QYhjWdl2ZYNHg==","it":200000,"iv":"NU6vSihAu0+LA+cH","ct":"yF0kw/M7wDB0VkwSnWw++DJlijrPxtbG9QIrbuzEaUdRFMOoPytBhpUeUNCO0xq0kwar902AQIf5NWgUddxwv1zjkcam110R4q8PK9ky9/kxAOYTrxX+TNSiryRGcLBt52DRGNRAgwwub+de3G7TeETA2snMPodzrR51FicuMia6sY+XC8UT1ueuEfITCl5n11Y6nXiMHcHKCw=="},{"v":2,"sid":"239659664","name":"را مي رائد صبري عبد","dept":"","pub":"BEXSd+qYljzzDZcD3BLiHOmJa87JMsiR8TXMr60ipAzOIdnx88yFpxLI3AbIirGeglEovcOSg3jOP+zWI8H4HCo=","salt":"6SFcDSIauWiSZgjHc3UkWQ==","it":200000,"iv":"sHGyqr8ITlESozhp","ct":"WIUbp+xeL5tQQL0C4ZNNY2+3fLZtDKFsuNslEZuFizUmNSWS9TKLjpKMpVIdT6gEFX2fNNT+BrpSsMBCbyMm9dTu+zBWdoonUgX/DUuP3cdPi8GqXLs/+j+/5J+M9g4hMpETH4Iav613/SD0wegJi72IGRQRuvqCHRC7wjWwIUsFwz/KCQ06GtqoIisz/4oFzMBTkcGD2iA2NA=="},{"v":2,"sid":"896372068","name":"زهراء باسل ابراهيم حسين","dept":"","pub":"BAaUAcwQKM/H0gEd+p7VuKhSaimVwJQOu1GYWtfg93D9YCC0Ba/EJekj6He8Cdi+YpVzW308KJ/rZnx4uxgEVD0=","salt":"l/IGRyeivuXes6KOqfgjxA==","it":200000,"iv":"I+Q0cNeubobagfv6","ct":"9jGi6PWqHqJFboiJTs9HBHuv9HnBwByF+HJ17jNCkJcAG4EJPBl2EJeVgXNdSz033MhT8DLEWJjlfup7lrMh917e3k1k2gDdZLoq/yyLjpayFhSnlIe+pcQcLzh8KDgH9wuT7GHlr9R43slJB9pnQPC5ymTBVpNfM6FleFX5EgqnlBv7VhEDGfMfe4mUGCSnv+VTkhbTCufaGg=="},{"v":2,"sid":"455421494","name":"زهراء جواد كاظم عالى","dept":"","pub":"BG4+LRnte9ufO9HXRcCoAsA1bPwaX4/0+pIbwNErSHCEgLMb4VAkxs7ERb1+mDX+iBgdQ3nXXjVvpMEYI8Mu/+s=","salt":"eeke9WG3ewwH4xrG14VBhA==","it":200000,"iv":"HFhxe3QtpmNVLxIU","ct":"IQMEDuQr6n6WXDFdIJ+6g4at+VbBAg890Tvyk35hlbTrhhZmbWbLDWaR8UMX6ibiwIssQ7VJc3NLmaCYaxYqp29ki3akKAyHqcT2+6PuHqeY59KNfIo+x6G/nJ1s2s9CAqAfcWYahMhKZJYiXtuWo5Ko6K4bRM0LQIH9Z7FVSujVAqCj2KqVASMJvmsH8W/8YBrEsSMlPwa5Mw=="},{"v":2,"sid":"255089203","name":"زهراء عبد الرضا خلف محمد","dept":"","pub":"BElPdmFiQRWZx3rCat7wf5uFpsTJXcsszObHogIhxCiGm3dx+OfP8sAx7NNjIntZIW6/lE3Y6imrYCu59/euYxo=","salt":"oWffVwmbsXCN+3Lhf2aGhA==","it":200000,"iv":"J5C401L+kZFW0Y8t","ct":"JqVotzadKM1g8gBG6ShokzXmxiYVYCNu9UK07TO86+SHkWce50t4A/XvVBYOgHkBoQo8TZmLbnSHAD4xtEzo/GM5RsfJOa2+06kFR62gav+z5Pr0aaQXDcWDhOLjjeMMjU0McDE/iqFaK+0VlsMjbgyjHJw/AqCDiaCskfgaDk3dTOrXyIbzseZHMUtBZb2NF9QipncIKjnyeQ=="},{"v":2,"sid":"267759351","name":"زهراء عبد على شرهان غالی","dept":"","pub":"BJfr9zgeLdTfs2xI+LsyvV4U5a5vGK9GgODD0MXjku+RovVAgO2C4qQ8ClEhMUgKyGkn46vLW28OtC3sd+st+y0=","salt":"X4DajbMbxiVWfRWmKgQ0uw==","it":200000,"iv":"YZXpmFGHea/yKlIm","ct":"8MGWfzkPAWMaO9XoTo2aGqMfptBUvtHNg8G3UAooK3FxjTFkbcJ7VPtprLzW1kMf/SYYfL5alyGztWDgVJbUT1/REWYJD8AVAyhJkzNUid/EHioPzLT9ypE5lkacVRP+0brMX/+Zvu0dMc1Z5G8Ckv2HKLIc1foO3o3kYsRwUNeieIxXL/MbDHAQAIO/Dz9GL3Opqzw/XuZxAg=="},{"v":2,"sid":"439865673","name":"زينب عبد الله وحيد صحن","dept":"","pub":"BG5qN+zr1SFdY34c7fhCzoZycjmBiw5I3K22K2miUDCW0C2Rk0MYupc3z770rWL+/udG4Jxauctln2UNRi+NA18=","salt":"q36HUTmvSFO/itDwgVn6ig==","it":200000,"iv":"gtjnlW6X7Y0Og8G9","ct":"k3xzi3Co+4fsYYmEWAC6CLSLgLGSY4Yg+cr/x4wmjD6UzIMmbi+38ZOLlUaqpGSlnbxWUPgevTn62bxhl5Zr5dzDPM7eW/5blpyZzM3orAQLXRgMEM+qAL90v34ecgpLd6MV2fQqC6J16TIezzWeLNdd+jHbq155xMCs8Dc5sH71vGzDHkkOclIQFS+uFplfrl5XjdmSPqHEPA=="},{"v":2,"sid":"463857277","name":"ساجر فارس شمخی مفتن","dept":"","pub":"BJohWiaW94gjNz0UGq+tgADl640wu/M5lDsqMdBzE/oLzY284gdAaGtvkmDa/Zj4IZTMsidf5p5ZGYs/AlzYopg=","salt":"z6rcD1vPoh+8rwm9dvPwvg==","it":200000,"iv":"Fyc+cBnjFIOcJGJR","ct":"JRv0dHdEjRbcHxcyJCXGCTHDO2kFrA0NRLzaEXMKdlM0iTUiYqI19dfHIgoOpXJsmIg04wYUITNN/NRS+3lvUz9xoIhJ2kQxTqZVVP+w8uf8Z/HqB8hidgCbUMQbm4Zy5EDNvyxYnhpZ0y4fKpwadZRPOi+Rf+oWPj5SaMt/n3Rj+9iU1clmT2oybqohvTuiFIOk68e6qadfxQ=="},{"v":2,"sid":"808557836","name":"سجاد اسامة ثامر موسى","dept":"","pub":"BH1GJ0B+mE2+riTDNJykujKcDtu71AYU5IzOACT878uluuxtNMJE6pxSgEwMJShYu+HzQ4J4So3SGR8dx5eW/Mo=","salt":"C8vz1twX4F4ZlJ2XE319fw==","it":200000,"iv":"/EQ7bTd3rE6dg2BN","ct":"QQilgnYn9WeZeW2vTs+rIec+QYUk7m/U/vfts41dwYsdq6IeRVTDHDKADy6C9AEsQuw0WmckSo/wIcu3tMUJtfFEElGLBYW4f09p6M2xdAOcm0GKeYveNY2ytH3lTpkTxKyB9a2ahzJKalHuK8R/SeeU9shLjZt/XNRZU3EfYk2PhJM5pMCHOtPmK0vw99dEU1KJBqCckPLFTQ=="},{"v":2,"sid":"305967800","name":"سجاد قیس مزهر شرهان","dept":"","pub":"BCdxYbtjjHGGihEDgC4TY5BCwiBCU2CI2pLIBiVHOqvCIcuL9CeibjWMKm7Zj76aKGMAGEDQVZLuV7TQ+ZQqvNI=","salt":"SqE82+46G7ebInCKNXa90A==","it":200000,"iv":"NJo0LtXXfJGIjReD","ct":"ZnXuICti1x2MjUnRiQTnzbJrLSvuq4xmy5I7AScNLbn5zGhj1IC4cOhlc9YR0qDbBX1e6lTnZBcswydBAEDmV3njW9dp6JF1B6T1SPkZlhokFZxIkctO/xG4EtAkefqzx/RvuobeyrmZwZxW+1YEt4gJmvKRN/yW/u4GzuLpuo19wa0iJEFj9Ep7+Nvz7ZHweAlcrUATG6g5ew=="},{"v":2,"sid":"549340538","name":"سجاد محسن هلول سعد","dept":"","pub":"BOr2hAPrr4o+wmqFa/z2Y+CiGKB83zI9kojchNCkWQijasDlvKgPSRlryaB3EKVk/6UbVG1aV3742ZFzoKZGlCU=","salt":"/bRK5+Fh/n0XcWiuwyl1Nw==","it":200000,"iv":"VcLvpuWz2LGI5UK3","ct":"LYTXM/eGxQONpw4AweqF8990PoZyLHs6jca3YInM1ebA6ZbqI6GBRmckk4ywMslUqtEHX75z41c0EifpeRPGQf073dxOnoLHFzNQa8wIdJtaTcFVAAvP7ds54dB+/QuP0VI5jJdoA1H8RM4MTLGdONlXmd9BgvzS0OSIjT8V5njVQvn1EwMZp7KlTphWhiDcWaTFXl8b2YP4Ng=="},{"v":2,"sid":"692296593","name":"سجاد هيثم صدام عفات","dept":"","pub":"BGv1YU3u84E2HjghmZCUW8FwTY7mjwHb9ttxIjXCKLNiHGaxTz1IPT4xcSpLAKy8xoAXAYeNATf2kC+ARffALn8=","salt":"DwN1gii9c5J6pEnz6YpnRg==","it":200000,"iv":"KepT2VQW6HQlN9/G","ct":"dZ7iYu6LGlcXOhdXOJw9fkwwDdwXAlA5D6db4k+vakHzYla1ta8wGFbYy4uLKs6bPDCyIB0lnjtjuipBBiywJU/I8POMhzCZl1PLspjCFpRX25HtViAnRfqB18I1flrXCgA3TiUVP1qGqFXUB9wT3FsIwqMHinbO9ag4ecqUxnsq6moiFZYgpBjJP4fPu8C0h672rILW7pJprA=="},{"v":2,"sid":"674188970","name":"سجی قاسم نعمة حسن","dept":"","pub":"BNL2qmXSk3FpVYu9tGU0UYrk90Ljzh6TDmH3GuDm2IZ7UIe35yymPkrX3ZOr4NJWxpYy8LLP6GA0o1/CXXdzkWk=","salt":"E2Y9OAEmTw0XIHuacDbGBg==","it":200000,"iv":"8c7xVW/fIt/YcrnO","ct":"1HZX6QEuvVVmgJ+/eG1IJ+FZEivVZNa8b1EeG0EqMZGt1gh/c8suMkvkI6NZ8IwTZ4MLDRld295EMaEW/HDVz9GF7bX7kcHAD+UiR4FsbDKOQn+dgHFQ8DnLCHPRZetPQHcaWVYtBlgR4zTOdzO0q56HVqZenyQ3cVeMpXlmeUpSZdhdx0+OIz+Vx/ozjrNY7XJcBaTNfLf+qQ=="},{"v":2,"sid":"320338608","name":"سجی محمد جاسم ابنيه","dept":"","pub":"BHdFW43GEzf0cVYcqO8WgyVC6SV/Ix9e3Ut3Q0HD3IcCV1CD0S6gdcHqmzRwBcTrBFG3n3v295zp3tTES8ABvwE=","salt":"RdlffHlXDsftrtyv19M3BQ==","it":200000,"iv":"hQQQM0WOa+M9ejZn","ct":"Cqz71aSv+p28JPEARtorXOP1JM3pYlX4bTbt3SssJMHPmY7G7KgxuIP4+cobysHm/6WAAFm2h1PIck+fcMwQmtky+Cyk33/n4PcJ5IawglLbbGPuQ7EFy4ZvcxsS4dv051IP7lWoUqwjLElpG9p/P5kr+UUJZWYa8DEJgoF85ZauTblbnLplfmlZMHxw05ur/NjrHxxbpcrHpg=="},{"v":2,"sid":"570888346","name":"سكينة زهير عباس جبار","dept":"","pub":"BMGm51adMFbPX346460S2bBoYoWzBeNmLgFZusVO/4ev7N9Z4NdePCTdXNXFBzkEm/XsDmattrYYLAMYhgQ2Pf0=","salt":"6b34EqrJ9LBAWat5BKB94w==","it":200000,"iv":"PEMRlpaL4iLVuGwZ","ct":"ajRMAbzfOBnLc16DDmCoAjHtXqypb1/jyVfekY4LdJGbQR4nUWTkJrI9VKxcWAMQtng6JFl/tVbuouU4BZoWIpg8QrkPBuCC6ssp7xeBuG9JbdwbhTEOIB1uOsewoGB31tmI2amDoHdG/GG3gQ/zvM42h/YTYBX+EEsRMaPzLGBuP8y8BuElM0k73q8aBkQLmyEyEN9v+y0CYA=="},{"v":2,"sid":"402368836","name":"عباس جاسب کاظم شغاتی","dept":"","pub":"BCCmSJzUH09mk8Q7K9PeOenOrusuWrFnkSvsnGxETiQ99uwtL13OT+VOx1EsHOLFwoyJ4WbKpvPq21COauM0wi8=","salt":"1m+wCqmE4SfdDv8/eLFtVw==","it":200000,"iv":"p4+YyTJJWbghVkLh","ct":"C53oKNLNvzGo/8dZUFrRXLwNdiSJR8kPqoU1HLM950sEd9iXVYu93+z42nUeWiM4zWucLDtsnw93uxgEwgfw0wpdbOxVyYPiMdZXDqytBzU0EOXOot+ri5BGh34JNCtgH/a40tb3PmTBQ+yO6/o/xtCCONld/HMuMx9/IrlEFk6Irp/uJd2p5X+v8Bxu3KBd4DQtoLRGwfz3tw=="},{"v":2,"sid":"514622105","name":"عباس عبد الزهرة عوفي مريجب","dept":"","pub":"BEs00C8vcN0KLdcoEl2Zs7Ykv/ixYZXjDZwc2LTr7wmU+K8x98cneEC4GEk6wBaKiOMxtB0QPgSt6tFeHZzP3Vg=","salt":"R9ypHg8Rwz8rztCOXxSdlg==","it":200000,"iv":"B+GEVV8tgHF24Sop","ct":"ue9pCRG2fi5y5jQHb516V8SV89cTYhnR/UlRpMk/ctPoV0VowSnL8c26D1OCAToUHYjV/Ez0NwbmXvZFc0DS0K7rl1X4kg1Q52MChQ08dDE7BXuB9+cVzFYAEFmBE4SM3J9teDF/p9Au+nQO71/ARtFBAeX++kk14M3eGmXB9jPZCeGSBOEhWAaovVKF7Rs+y8JfOgUBbktpEA=="},{"v":2,"sid":"489292885","name":"عباس على حسين حجى","dept":"","pub":"BNAA7stlcjwcBmNkN9kY0LB5X5gn9Reoi5dHe2IAVv7H/DulPH7igbCz06VvrFiSu8Lpdp6O3nQ9PpOFkNhtJ7A=","salt":"0sXnWF0iK0I1y9w6Koqgbw==","it":200000,"iv":"WGckKWin8l4ddZ7V","ct":"NY5XHGzUvf1rt5wYRHZ7jAB+n30xBCXUv4mhrKs+VB/u8tkPzMxVrV+QDzZOtvSaYOdykqQXWhkM8ZdoCcBAuNP+Ch4wIXCiC4AUgCXLJNkcfb9D0uzTxKANb/YZhl8YQtdBae4A6Ak+JBv0jvI5nCjBxbwB3VL8SeqmOEqOzyMg/vgC7t+xhWNZ5LSQ7kX5opvrEbnn7PieYA=="},{"v":2,"sid":"450522279","name":"عباس عمار سالم جدوع","dept":"","pub":"BOZ+mvMP6YZAaclkErr1TpsfU2m8n8phwAyZJnTY2OvUeBMbldy/cNBEMutuJ+2FWT4fEKF2JoEZewdWNyo7tCU=","salt":"bVlxK8HTBmaf0jGTFolFfA==","it":200000,"iv":"PwStsqddDgq4dvD2","ct":"SroPgyZGg5Ipd1FYnf65yaSuQvMFTAjw5aUloub8OSVaOZRSxkZQBgM1c8VlnHh+jt9EDDWWn0eeQ7lB0QHEHnr9i76q40oTl9lE9HLuuqZunMKynDnd9GQWI3taVlUGkT26MLFOyY7w1nuaPxop2PH/JqSviM2YX2WujfL1nVENjdj6O8kiWnwRGtI4ZML+a+dZ+pcM9rQL5Q=="},{"v":2,"sid":"900036121","name":"عبدالله محمد فاخر جبار","dept":"","pub":"BM5WZAUTSlEFW/I4nxDsJ/lfDUS9ipjDUHepLIXkjgV0q6tK3SV2Os/ZIEPN8fQCsaIBS/XELuGKG1PjF5mcRBw=","salt":"w5xcSfeuvdIHEYhjpilK7A==","it":200000,"iv":"5vGNY37fRgjHMuZD","ct":"r049+suBS47CCAOkkp8ba9VGgZQ8Xo0lgDHSOJukl1m5PUYv8It4S6IeQeFBjVqz+TAHrLjkN0FHBZwM+siGuanrdlbzXfv+3tDGPOy1XDltf83EPkIijwjrcV3/gUM4SGEsxR1HcAc/ClGTkoNbZh5xS+W7NjGqGeeW6PfMYTrnn91NwjhVA0zZKWY3BeIn3FhWPYCyAiNcAA=="},{"v":2,"sid":"623632006","name":"على احمد محمد صارج","dept":"","pub":"BOKx4ktn+4vdkQcRXRjUCbFCKJQ8/uAyhD4Z0V4QHgpLZOG2RT10/BUCYGNdNiy4O0NrRy1GPfr/Cr7w1r2myhk=","salt":"IJc2dS5BHz4JBCemTWdohg==","it":200000,"iv":"vp8S/FDmRVqR6u+5","ct":"/htLe7K6BgdtqwGtuQP1320FIyJAPeAaBZ331FfYb/5BCwvwHNOOxmvHqFVUtjj+sNo4O+dNjPYR66ZF7sikCTkNxs3qKXQetYhlt4VGw+knlvNd2kwsJmybOEWFH9fvP8VL5vgLyubzPBohgSNr/PqfGAyVgE12S6pV1D+P6YMA4CusDF7p2FkPa9U9/zgWZRuxQAcJ9c8JhQ=="},{"v":2,"sid":"135719539","name":"على انجاد عزيز عبد الوهاب","dept":"","pub":"BKNjBQ24qHMpAm1kXlLxh/Bf5x+3/ikH3jshyWffbOLySu5kVN7Q2WiyqXTBngRRntnNfcYa9LyBdlg/ZSiHHR0=","salt":"DR36DJNo1FoKCfzRPzznLQ==","it":200000,"iv":"lDU2jXko31mJgCR1","ct":"I/YxtKmh5hYHTVYiAazpq0EXx2ZuVHS1H3NiKZhBqlE97IYImERIYrd50f9XRsiSvsQ+uOlbr3mIbuo5krpOAiFdHeLpIu0QV0Wwdroqw72GqFgK/r6tLwm9LHp0mniLkVyCAadRgsugBm319y/yrjbzLFzBzuj040iRaInljHv1BZxlobM14sBc2s76jgf7ph0b+k0Ss80Kkw=="},{"v":2,"sid":"893770036","name":"على حيدر غانم كاظم","dept":"","pub":"BOJGrynavZbmfSPL0bNPDVqCCkGk5N/grYnyVYkn8N6rYTQYGA927QgFmB5UoT+zo4Msf1mCtbAkAsZ8sXuM7SY=","salt":"H7yl0xm9/g57xg5k/1H1Pw==","it":200000,"iv":"tuvkRBKcDaMYw+ib","ct":"zqNqk12PX3uj6BZpmv1ESETXDv44rQz+W07GDmN+B5zVu/9OIgofOcrIJGs2HRRtbJmsjd9//289WQjdAnVPDcSTV8eQ9N0o3StW5DluUAaIm1zTJLnwyUdZGXZTnK9bsHcI/u5F0RoE+DOGfy1Z6UPpW58aLoIaJQF6Q0RdVqNgid5pphxGNoL2ic2tRj2cbj0YySKwRCyFHg=="},{"v":2,"sid":"123412506","name":"على خضير عباس عذيب","dept":"","pub":"BPPKPK7W/05t0AGWwcN2Tq4+kcfKdXYwxPovvxZn0TBFimJCO/oc5ns4XW49VtvKSZsslOeBAfGaD2ISrm+ydO8=","salt":"p8x0goPxMJ3BgjssrM0IcA==","it":200000,"iv":"pcwv1NTDPa+kL/aw","ct":"E2uEwL4ElhL7iL4wQcnZQDHl/Zvy0rHv2XpL0gAsV8BfNk9QilQ46juJ2itI6phKKpvadx6860pdpAQesZrfWWNu66veNGk0qd4SdbhrZTFS/uZS+2nmqVQmkCEG5bFDvzKXylEIG6fP6rmrzy7Ycmmujo8OypfpCB91wdyIhxl3q4s1vOTGXltMNtzJQNr8sE0nvj5HRpTuog=="},{"v":2,"sid":"608103188","name":"على رضا احمد کرم عصواد","dept":"","pub":"BP3UcntEUQTFvjkDDZAuPr4vCGxGuXfNzgKwdq5KPkEFE5GW+lv7nT3NKg0I4yWSFvyI8k2LaRn6Je84fhuXGy8=","salt":"Kf1miLm7Xl9B3rfKd1gvBQ==","it":200000,"iv":"g7swlQsYh9NEop6b","ct":"RTDeGuabXnMR35efSNrho6YkoRJAQW/IDYY+wfrjMRbkh70HedbeX8Q5s36Ep4QCPSiA1RTpjiQPbM6b6Sw6MPWJifSwcp72V1Fj3JJwdCpp4zUB1HHdYgAhUgFeR5weJHT9174izAaBhg4QeTKQUAurfjXvzVQrhmrWasA0wqn8pcHNMGU5rNwXRtcTNDJNS7EQixvGvZKziw=="},{"v":2,"sid":"421852374","name":"على سعد الدين على جاسم","dept":"","pub":"BBR84JuHFdVcPaNzon4xNGd7pygHxghnjokk3n5+JpnLEkXaBRhVynb3if7QoZ0mMNAy0+fgduRNpM1KqFRu9zw=","salt":"QChbWnIfdcGY7pxO/gkDiw==","it":200000,"iv":"d8CERRhQ2v8yb4xk","ct":"F2z36OkoGmAhNwoqg6PRBbPFbRx/mO7L4wfeZXDXD5OzfNfV83SELUWE+LqlpmFjUL6XvyajNjbnafjQVE90tEIsovzda15+IQndlNKqp7x7CQfKbEh2aYXCRqE7ngNOt/hyPuQaIIBm5OA0NZvgMUnWr/iux0BBNH53Jvw4UB7axqRVC2Se45WSw4AMAzdQf93IYpCxL7CYxQ=="},{"v":2,"sid":"938093920","name":"على عبد الامير عكله سالم","dept":"","pub":"BM2RrSfcpJRYI8JAq/986NJnOO/AbVme9fbRzC3F8rdWJBj7lmSCo7mBtdvCO4K3UQS6ahfhchHzcfVWmqWmsLI=","salt":"IvA6cOSYLirsRxIoAOsocw==","it":200000,"iv":"nMSjBn+nC1skZXow","ct":"kfGCh50Tzr/opxfeu8aY9H8Pw3BrfeeOFdM58rXep7jWZnp1PClPTqsH/dMmgwysAU/SdYKcQ7QWf5/gbARzBJHRgOdNFsI8MX50H9bY5NE7NsNnb81W2ufKxX5cYKKH4Ol5BhnJK5rJeGWgha1p6MKlIuk8s5iLe7LLO3MNIWpl9SKiq4GQLf7XqD3ER0E8foJ2QRlMyqakyw=="},{"v":2,"sid":"800696411","name":"على عبد الرضا حميد حسين","dept":"","pub":"BIClFsqHSffJrAkbULVi87VWfw3PZLRnmv/4kyVB+2jXk0BR/xKwdCI25NKl3gz0jfDkA4VOi/LA7ym20utWbns=","salt":"c1M1XHlGoQO4MtcDsIIhJw==","it":200000,"iv":"27VU7x5tJdtDenON","ct":"a2JQ+nn1ZZBEHZ0siUoxp29tVPrjERlyxnnFpJ1mI8T/lGcqzH/cn+2neQf/voKk5CM4TGt+29ITKXJ//O0PIndVclT2/7phCBA9gtVxJctfQoVQaxj7fL0/Z43vAG57lD53HkuRI2nzg0b5IIP5gzgPTOj0YtAVmUt/U2y1WrJu0/Z2sFMNrXR+h1289gQlX4tJ7yBpRyJGeQ=="},{"v":2,"sid":"591069714","name":"على عبد الرضا حميد عذار","dept":"","pub":"BH9PvUKmLNEbNxhAcxq2+Z/GaeFEVsEdeum22ZRzNt0QLbZ7yBoqm7Uqbj5XLM+Le26xHy0cUZDKfwEHzdjeHhY=","salt":"49sNMeBs0mRIifZRNdIJVA==","it":200000,"iv":"d7pDXFMQN21cKGEA","ct":"a1LBTMpgYny8SfKUN4rey5gdMYfek0X61Sj/okrDe8O5qXaJ4+h6RIORhGdl4wtUri4eHy3OFscEB0vsMcQHBIYcqaGo/M4UBVZ46F2zNKMUkKw5d++ekjSzpRazVWqY2wQaeNG/VTpDsqL5DTcGT6LfC/NASTr3EkNhMQnJOUFZTkLWgMfLuhFDiEa8EDx3u4e8m7J0ZzMORQ=="},{"v":2,"sid":"298246313","name":"على عبد الزهره عوفي مريجب","dept":"","pub":"BNyRqHgfR7FWTH9GAzTVdvKfM9eTfI3ztbt4N8PFmatrK/uUqUnIP6W2FcqqPXO+Qfu94bQp3GfWGi+ia1s0CBE=","salt":"KqjHMEfTRUjWZ2geE2TQ3A==","it":200000,"iv":"9HWaicrCw2BcUywY","ct":"VpBC4rLZYqBY0sOZwIJll5bMC6vxz31uNPbX+NGLExn/g7QeV/YaxXi+y9gAQfBBJUZ/5bptnPyKcORfvPh6TEEJQEAQ95eo0TawHDccHH9aOYGhycRyu88fhnNWWuQsB7+f4a0weFqipGBOvBPNfEJHpbLNo6o/Di/IKxnUxbgDZEImHkMbXQ/wSUlGTDZN8RQvFez4rqU8Gw=="},{"v":2,"sid":"972813944","name":"على عدنان کاظم غیلان","dept":"","pub":"BBgnQFVIQXCbUJgUrJyJdzzE/fx4VA5Yw7Z1gm1X02Tb4c3k8nop5UJHXgEi7zVV0eBf2/UVLkYiABgs5g6Q5KA=","salt":"Yiw2UCZnTqpTfDnNNFqEPw==","it":200000,"iv":"gFGy+1jL10eqkHJ1","ct":"KCL1NeUGM+sXsnR34dYzHPLXbh9GEBcLVf3jgcTcf0uvgTOtv/l9pXD+4PoIceh17BzH4PcbXf1aLlu6HOjqFJJe8nSBH5RAJPAwa8Luwh+GA0OJOMJBLSRLlWuJLJU7QLZXchpFBrmWkoFgwUwI570ZrKaMcdxqqHwXcyvX7wRv1QURxE2xabgiJa+Ik4VdOnMVltoHrRpPSw=="},{"v":2,"sid":"517777104","name":"على عيدان مهدي كاطع","dept":"","pub":"BIFuoYvcMohq21Cgh4WP6hpCYRD5YUnVftkvfR8zC6TEB5RSYWuudjECCgOeCy2Cppo6zzZyDi5RiYqYOvjpRuk=","salt":"ZZ176+7M/QhAkrJtBwqDKg==","it":200000,"iv":"1tBiYZgIuZ+lL+Sn","ct":"qlitBos7v21WFV79sIjgNt2y3OjVt7dZmtXQqBQQ2xgmMPtneKngsCkok05tQ310/wS33WXVRl8tYy7J2oAe4TC3ISrBVnVWXtFeB8S8q1BEaiYTCxAWOfk5WRVUgVJEK2wqP6nOIAdrJoUa69p4WGIA4I98Pw6vUd3FYknt7LzKkl4pf7GAAa0qK5/tIK3PVddS6MqjRPd+DQ=="},{"v":2,"sid":"922106245","name":"على فالح حرير فالح","dept":"","pub":"BOaCWf/qdJ0b/kl6ZVkRc8yzI1Y4UiirzVKQt+wF32ibKrJa4E5PKuuNoYL0LHSc/bvG27MQcQ+czje9VlOxaH4=","salt":"PFBmMxvCpG9cq1kQ55HvLg==","it":200000,"iv":"RmkJWhHL5JRyyHVJ","ct":"fYWrQDzEGYNzwiDlWEm4PsOqZvAh2k1eulOFivO8QMroGNkPDa5QoLcmRbLRFKQTAvUM4/BQrMt8vxBtYtZZcsr0ffRSKmf60X5JOoPunZG3W+7leTjaq/jHrQYL1l19b2LD5mq3W5R9jY7gp9vdiLvacnVDUsNszeqcJOeKcqftWTuWMcxvs2lvt5m6A9wHhgwLJOiN54vCxw=="},{"v":2,"sid":"889424690","name":"على مازن بهلول لعيبي","dept":"","pub":"BMK/4hswyeoMBsE0cTA+Aeu0Q3iskQPYRuKTnaccHvJRbUEFel8WRoME2AvvPCHl9VorDN+17xmi+uYsEJKcbnA=","salt":"RtVQpYY38c++J0CT9InGcg==","it":200000,"iv":"vAu4be4qytWeK7hw","ct":"xfBELRy5cbfVZqIvXEXR/HFkA5OYobSrQfYH2sfGCdn+NCTGGsZfP/SeKBQIhiX/Cx/L5U11K/Lr2nfHsJE59Hrqtfbe0b5rbtG+N5tpy2UHqVBDFLLi/VG/3RkumgnGNEXMrxYZ3IO0z0oVyqjuLegZLibtSMsCKNIfatm2JD3vbGCj4km/NqOjs9V6xxBMY1DNrWqWZJoKPQ=="},{"v":2,"sid":"469240699","name":"على مؤيد جبار شبيب","dept":"","pub":"BOCGraboWT/TGJjl0k5sNMeGPZyMQz9KeFRWFhF438gmaot3Vs7G8Sg5Qs7CHPGerIeZryHCZIfCDBm+OK88D80=","salt":"Giqny3UzzFZJTvlE3fmZrg==","it":200000,"iv":"4v9nKuWdh92at/68","ct":"WBQqhIRRSY17s9Of/o/i7JYbFivGX3ZpbhPJnn2ySMDfz6IBDGeMVhseN1pDyuE6rQ3ghkRw0IVnr8KG61LVprzcLVCBPAcWsCCyqGApgdqXZO/RchugYz18+i8Q5H4FDSlDO76NoenGfjc/FMTKw2mUHUaKj4BxxlK1rP5AeC7DUoS7tSy8dsTcK1QUjH6MYGgTJDrxnfuvxg=="},{"v":2,"sid":"553017463","name":"على محسن نعیم حاجم","dept":"","pub":"BJAS9Ny0YNe8RLB/K1Lwphu2ptvIjs2Akh6bUZquhYb2tSFbO235a8dlRdCnlBZHtkVsenNW84OppqYbNcMYibw=","salt":"cuicnVn+SlnopNZfc4mZ+g==","it":200000,"iv":"//8rXQbg59l8027o","ct":"QXMKB863Xd/Y/r0jYKxXvFQLgSKq69UrXfTEKZnI0E1nmNVHHbgjS7KfYUd4gH+v3WwWBCC0r2f7XTcqHwcz+rKmifNLMpjWQUP/EMbFuDjjNOm6ijp5W9bPhFXxHWWBLOGzqaW3lGtC6+4M4TQMrq0GzvV7iT5mKNRp/bOiX2p1SrSWLqNzMkGjD//TtZF7ud/X9h8dHgWZ+A=="},{"v":2,"sid":"374766821","name":"على محمد احمد جابر","dept":"","pub":"BPa+g4YJn5V8rBpkybIOWtATkW1GOn8vwiDotpJE/I4iRDvrHk6qUAaJtqOtLInpLEWEqu/L8sG5qnW60pq9MzI=","salt":"hhxTnyfl0XhTK3uKKPvOzw==","it":200000,"iv":"cfVspC13xC+DzRCb","ct":"awOP7SGvK5ggiYwye8JOwMjEL7yW4/YBBdlqH5UbfD5ZhIufIvlNbbKDvpgaUa9DUvR+2hVnJYiJt7+QtKCKL+rvFJovzG9VMxi6/jlLnfS+F53iWf+qwkA03zc2F4BfPCVRYg2b0V0lIlX21e+4GWLV+79nHoVju1/QO0+ut8p+1vQCm9d4BVjWqFAKaJFd7fu0If4Sz3SkTQ=="},{"v":2,"sid":"536742935","name":"على نعيم شنشول فرحان","dept":"","pub":"BHeH+Tp/oJM771ZtScyGqwyUEsFG3MKoPxB9YC5tiI6AbVNe+D3J25+AMFygRoKQAepiTT7ox8dXQkVPsZcfKlE=","salt":"0hvfHlZPU62fS3m316WuZg==","it":200000,"iv":"iPgN1luS8pgbHYsV","ct":"soTVEmowM3XFEMxBhcKRi+Hr2RfH5xwwYQKmckhUtrIpDPkCHZqGgLFOiEJYk/NYrmJfEsJp6gf1+OpFzxlfhNHTE3L9sc1sbXuVtOdkyI0h7yLbzALDMNj7B8Un2IW96Z3REHiHbhXOYz+9LklWgWLTlZ4+SzjpN5I5AJYeXD3TMGiXi1qFA6fZyJhMnD9GBhNNmb/iqbT4Lg=="},{"v":2,"sid":"626206432","name":"على هيثم نعيم كريم","dept":"","pub":"BKGfF5P+o8MUDZMjaVX/Ulx5USdJopzxdPm4eNhLrOSmXfprFCQcna9EHJuOPxS+ubVkNxQD4INJteyvzlhapX4=","salt":"ChjpzOovsUORZ4WIEgoGnA==","it":200000,"iv":"PjYp+9l3W2jbf42K","ct":"vp1Q+XwQohwFhYjRZHwNPI+cx9hD2/ln78j8xvEf2PkFkgVzrnlaSdQSwkygR/l2S9pWTBEDsYHIi7BMN90XCyxtAab9ezdiT81feH4GIU5TTRy5TRu+u886BgfaAWMH5VTs+QoeeA4zYGbnp71h+VegkiZMPKbuOFd9+aYuJKt+ixm+sR5MBbURln4HK76WZxiF3Ghcq763sA=="},{"v":2,"sid":"492928221","name":"على وسام كريم حميد","dept":"","pub":"BFnVjzVRnyRHxLNbcNGj0p+9fzfp+4mPcWiMvhJyIfFcZE98c+fiZ37D3J1rt1iqE2SNo2tzipamTb/WqJSKXyw=","salt":"AeZZbp6RUCsVia46AEsDgA==","it":200000,"iv":"1XhH+Dv472McRDKV","ct":"npWDeRoJsBC4ZSd4uRLAloW/1B5b27jU/Ui8W58wswdnpHdj0kGUrh/vEbbfktdEbkQZ3gm8Ts35jvH/AQBBqkenOF85d48yxleH5faoaSFflu1dPYE3tXwI4JON/sy1NqsaBfVd2v+mKwPWDV3iLu6nxkJ00qdVMzUY12s4Cf2WH5wTKAVNYftnYsfaQ8EJM+9I/b1BMqrrkw=="},{"v":2,"sid":"643746021","name":"على يوسف ارزوقي قاسم","dept":"","pub":"BNv0r3HpnT8xpoEe4QTOJTu2qn7Pd6i6N0BmgmqCs5nxllEDZAxREXcqS2GTrDaA91YHCWNit6nm+mH0cjTXRCs=","salt":"edYCSyaNfmpnBIfCyUZ+BA==","it":200000,"iv":"agtp0/ZCo1Rhm20b","ct":"NvivSaIGdaizjtu+MubB3o0y5R889dZvbtSpThhUT7ZTZzsuH2B7t+lu4P8fBqh/IvtYEsfenHkS4h1SoOGD0emMpJKUI4Jbjg5gnnxfK9fDPng8k9FGUE+Ki1eU+lVV5iFaRA/KTa5ZV2Ub4B2cuX9ljSxeAkG+BMc1PNhi/XwfwVS7kGwxDIP+i0MQNjBZFrbQMZM7eyhkbw=="},{"v":2,"sid":"317099817","name":"غیاث الدین اسعد محسن مشجل","dept":"","pub":"BPd/magrfrLYpJCKe5/FBowFfvL9/Wcw+GU/bT+BJb9tepscL4tepIKes5sYlkjcCDdEHkO0DSJsKKjTRkPZ9dk=","salt":"4ZYRj+wL+CLJuiPpHHwjRw==","it":200000,"iv":"8SkcTYafrZ0m1r6u","ct":"fLSlpFYmpXEPayVzmfdudxRCabqTv0YJ3+PB3d0RqL+APt8YXWJuFQyUQeqYZAqZhH7UcumUz6FXf4zhu5tItl0WK6C8Ieg5eI6A2imi0VU79b/B4WXQ4IBew+fGKPH5EVO6SCgr7NBAe/KK8o41cDwyp/dgXr7Mbj9igRami0hK3zCWx4FIThaET3LRS3mzKAf4IWpu7Qu/6g=="},{"v":2,"sid":"256929872","name":"فاطمه احمد حسن عبد الحسين","dept":"","pub":"BPYjqiOlxakLsUu2I//FMXUSnOG3ewBpO3PDlqrqP3kMStIJn1jOoc+53KPPrzcVuoF0tpYHU3PZ/YllXkYBRyM=","salt":"KKld7NOVEkV3G5rKZbt+Eg==","it":200000,"iv":"L5tYsaFn3nJRPXFH","ct":"mfPh2U9JxMNza3NYhufBNg4d3ytUDAtzPvYm3zT8D7AHQzoMlPfzyN+cPhq68X2KR+CLbTHepBSxulO+wEnHfBbipoRfqaTGsxrbgMrQbEuJxNcE6a2fSPRiZFhb6HvPPeaF9c0GoiTzLLxGv4s3kBkheIe696E7TUfCZ+JmDabc3msc3ndumKhkw9idxd3gPpntdcWbr90unw=="},{"v":2,"sid":"161542893","name":"فاطمه الزهراء جاسم محمد علوان","dept":"","pub":"BERrJavPwSsPISWvcNDdqReRPIfW3+/eL/tlXaKGzzlbEr7X+1Yvaz5wgsk+0HF9rlzHNAeAxXAbbzrakgZhjgg=","salt":"RjxoiZafQY8hZfzSwahqqg==","it":200000,"iv":"Mu2rY52muYx/4M7l","ct":"6Sh5vdqNHfT1MuhvE7n7GibLHjoGs4cLjPeAOKNRCaJXBk4+FuqFDuwgDNtvhwpgGU6hEU5gPOSxMcYunOrnMrI3zp92IkE7qbKe1sSP4Hng0wZ7Ky48CuiiLR/cwB1oxkpBi7eZjyEhL1n3XZqf77+Z+0W15/T+Q9DisWuuzcX+tGnMgDyiaBM5nMiEHrO2DPje4ZttqDWv7w=="},{"v":2,"sid":"436664610","name":"فاطمه الزهراء رياض على منيشد","dept":"","pub":"BD/aOAnVWmV8EiPcKdn1gM3t68qP3f0U6p7q42gjO9qMd0jTlrQdeweBg2tDoB41tVl+GqLFxNovxmNi0nSWawQ=","salt":"Arf0HG5Gk6GjEXMxuwAn7A==","it":200000,"iv":"9rbgfWkC2xmAzIee","ct":"xThKO7CrJkZO3a0MfmjXdZxY2pFIqF4NTjJDD46i0ZCmDVglVcoUi4NkDsIjSaaR61iZI9LgziS3FS17TUaMAjNHP55avOgFGQk+j2+SrZNPUEwpIsGwF0K5F67aMzOhGaueqjQ8DT/OTauJj7Q+KCxksCVUkK27eV7Lbo6MBbBCoijULXNRwTEFtHzCP7sItBYak2AYtmb7AA=="},{"v":2,"sid":"652328313","name":"فاطمه عبد المحسن محمد سعدون","dept":"","pub":"BDjjiW9qNaH3DyAsMxEXi8GFSJlMkSHVc65Ze0d21G0fNjornYB7CO2OW+JBK6gPldWHSh1DiWz+9AI/PQi9Rn8=","salt":"ueyuKtyi3uHVv1l7RxpKnA==","it":200000,"iv":"3nLQCUtWIRa04Yth","ct":"DWLBkDxj1ZEXOyQuppBdjFp0w/P+PT88fTQCrNPHTxxBoaPHkIHuhBY7ojy7XHOcWzotKQxGM0sLPrud8vKtqvuM/o3bdIGYAWzCPgylodM4VUsOlfqXbpC3eIydgteQpai0EuYjxMuAEqg5x41hOBGLYqujGDtgvETS65F9B+V3PJh+advSRNk0+UOnXHdk/lofloXKUmb9nQ=="},{"v":2,"sid":"699317830","name":"فاطمه ماجد حمید تولی","dept":"","pub":"BDdLDuuXMz0Hh300h1efIBJMlhsUqsG+wBubpuIp47PMF88K80fmrcfoTbtY4uTgwi/oRnC3i+EBqk0O62j3hGk=","salt":"0bFFv8MKwkqMwsp87J1JxQ==","it":200000,"iv":"Cf9dzyhEoCnqcy/j","ct":"XKUPeSgaCgVkyfbj2KIyvz1LObUZmT0mDnLT77jQA22swJ+w1QERj7Am5pa3bNMx27wimAFEjtPySrMLf0JG5qAYOFoiyXdHxsDTxvCEev8MeLLG5y9XofDRkqQGf/w1oYntVeSsZDq361Z8gs+TPuhXF1qlEE/VI3/Uykv7+nT4a8AbSO8SobKSY1fDRJ0kAEIiHv0+HQCdGA=="},{"v":2,"sid":"280061055","name":"فقار كريم هاشم فياض","dept":"","pub":"BM1VWgBL+Dh8bntkmy+VIgUZUO/BEAWKf1jVodsXU17DUTVPbSSHpJYYIygfRT8bd3XqaOXtBwrR1Dkb2XnWu8g=","salt":"sZf5jQ5kmVxPaUPDbVi4rA==","it":200000,"iv":"akxrzqoU3m2hopuW","ct":"yoeKSLdozZ0DIMg/+BKVlwnjz9RJs2Zu7NJZHJ9IhDoAWbO+psRThLS0O0J5+xNCvevhh8IuOT3oeo5Qxe+hSpHho8hWP0Qm2alAbNgDeLTAl0G/jnsM78FMQQUfhAxrLs5i9ZqCi5UcW0V6s+JruXsHYlpgqvSik60rHs40T0cZMJ3BXMvo/0Kdjl/7BEABn6+qQjnTgyY6zw=="},{"v":2,"sid":"556379785","name":"كرار حازم غانم حمید","dept":"","pub":"BDTNMQJcUHSW3ei8mi1qR7jL366Uk60n3zkqNlvqARUmLQBtW6ryakttRmX43qc5gKuAbxkwbiBEw0myzgkcdNk=","salt":"bxxJiLJtI07/X6fAVtlG0Q==","it":200000,"iv":"d5FrKkQggIu6vGNn","ct":"AzbqJihzerMZQJspav1I6TeaInC3+g3ml+IlndRh8JeOoMpM4OfsjOL4G4PEreAi8DEVM8t6d1+tDMj1rOo+RrCbb0M5n+L4dnwBWPMglToPp1y/nEUbhfcPYGKG75tiYkuoE04mlm2M0emI0VEXYrJ3aD+asUvghvubaJ5ajoBZwgrsylG5KMgEKEKYKuazFsBV8JabNmxnDQ=="},{"v":2,"sid":"177557059","name":"كرار حيدر جبار مهودر","dept":"","pub":"BMkjlFAvepo5LCVS6TCQ2ip2rySndqEaaRZJilPFK7jHzQCx9AsLnMGS8cC28HfuM7VYU26FcT6ru2cOnTzHK9U=","salt":"qnkDnZ0d8b7GRm3llGTsLg==","it":200000,"iv":"DbxM/p5T8v7tbRGe","ct":"rtZNwhiN8B10wobfWfxakOjFVKXkCI7M0dEap+pUvwgDbuEDebTT6ux5/p4kD/1FIKIOldwWxr+XKz5kqeS9YewE/V9tl3sjh/9Cs5amMg+g3LqP8JXyUzvnz4qrKQQNl8W5M1X9FEKaCfXEkb139FXwszIHfxdYA/1V/O4uaujaNBIVtSe9WIr/rCq+jcSIa3BoHt9g8nKxhg=="},{"v":2,"sid":"204748641","name":"كرار هیثم جمعه خشان","dept":"","pub":"BNnPFTkQVyiSJ/zCfgoTBJ3CzjvOCCm2tbzv1E8Jyxip5XYnQ6kFll93r68Al/BPEuCcKIY7g0UAA08WvQBVoms=","salt":"hM+Mg6Pu9ri0+zeDr2CWcA==","it":200000,"iv":"onQDzlStyC8bgfs6","ct":"3bNv8GU0dga2tHBQ2m9FyRHYzcMa987kF0lw8AtvhXkXh44W/zg6CJhplldslWlHtH3WUMhMCWdteLaAzKMA09r+5QD9vbjODFjLals5sq9VKmuCZGltjhW1Ml8SkyT0Qy7Fuv7DFmiD6cprAjY6wN0Q5N0ZFwwha/4FbEW+4i+cE/P0YGxt+fOZlDvwO+NgM7EtV4IUKORKZg=="},{"v":2,"sid":"440536916","name":"کرار خنجر ضيدان جابر","dept":"","pub":"BEWiggcL+KCw/GjRhoESJk2mQjQB5ovjFPNCucor2KBiVqeOVcVGq5XXGSXe5Dn6AXPqW39cLehJWnmzeKNNpRs=","salt":"oan4D4/2j6bLPUjelw1smA==","it":200000,"iv":"fnHaRjY67fxD7kpI","ct":"aSKEvehe2gNvaaXFdDDsCfbaqQh2C6kaijTe/DZgEmKt8wsl6sQxfJdwfbgNZwpbEAN+kzldaii79xsH/IojAyhP2lMLUS4Ew3p3FWkkdM383b7QVIhdZlgBVc5W6FFAkFKEI3UWeT+VmtKM0IdMG3m1BZIBMLfmNR2Di1gE2nRv3LY426yrml4/7ocfrXLHwj5n2kSQVZDsoQ=="},{"v":2,"sid":"130362126","name":"لجين رسول رشید احمد","dept":"","pub":"BLZZGNIlZP7TJ2q2P0fvVtUjrjqgNbZEKSSQscnO+pXpcSNlEe+mEiezmnQ1/tzOwgdLvESAVbIMAcH+0mU3nVE=","salt":"ogbZ/Rmx8Q39JtRRu9W4Zw==","it":200000,"iv":"twIa0ikp74SchHzT","ct":"X3V/HSqZyJ1fFKFwscwcPYITOLjxOaQiGgwkxOfXH9ecfuFHr4trgmtX2sbRi8X+dOVtldf7sOYM2AhiueDbheJPuL1PzMaGkspJ2WME9VvNBEgUJXcIUWB1RrgaDlnnBLQWIFqIkiN88+q8sGnj7ZCcmErX2n215sw7Oa7uImq8Kk2fVp3TsGuQBmXow/KRNiqb1izQy00nFw=="},{"v":2,"sid":"768147256","name":"مؤمل رياض وجير خنجر","dept":"","pub":"BOj00Fw4G8LnZ3v9UJz4tApvy3n+nhyEKHvq7nBLcSmvjk6Fj6iYuwuXH4HLW1iKbEJ60WyG7YajTzvWwzadATQ=","salt":"tu9k9mmF7pofJkGk5qmzlw==","it":200000,"iv":"IWUqeEerI5iP/HIN","ct":"EqQo5lREfARTwYm43O9IodsNQhXaxfaLaLkEGTZQjOsZKpUgr06ecQ6W4MKndIFwbUetqFSk80U/f7hYnNMwbUVoamjwnsutB/r3mLvAhS1A4uPVBVITYXhUw2MTiSv4XilgxU4YM1RG2R+ty6cGe82ffHA6hxmBU9pbchOcEJTzUnMCkz/xdN3HuoqhurroWtric/rLZ+mObg=="},{"v":2,"sid":"289535068","name":"مجتبى عبد الهادي رشيد ثاني","dept":"","pub":"BLGJTc7yOx/E7MzHsTAHvZ034XGW8q46R//0zD/vKLmKtUQthFxTWe58fVahsN0HRzb1xK+HFRdRO8agSkNsjsQ=","salt":"ZVgggF+vYrI6kampU6+4fA==","it":200000,"iv":"wShw+MRWKxu8svdY","ct":"z8y5fdiA3jp7YO345f8197YkiUW0M6Yr89UvRb7Ea6oZh6Jnv0zyYRE7PwOtAayK2z9Qo8wjCCKEY0AuoTYZWjKqZCA/8LTw1qLvzi5cfFHM6oeEIWHeMAleuHU4HWN1Nb2U/sT0gCl1Bw9TFSxE0iKhzlAZdDbE7oHaCeqrpphwASFXr53zK3qYAss+pYTJhZETjQ6Z5psluQ=="},{"v":2,"sid":"425596174","name":"محمد احمد محمد يوسف","dept":"","pub":"BPNEuF+j2mnno/zVtzfBHzoBG4tYboSQZCPMDFNhB0mmkVH8MPij4MGX82vMLsKpMXYmNBX9rbd+0qpUGKCGhqw=","salt":"ZjQczenT5qOuCeSX8dv59w==","it":200000,"iv":"WOgqjOVM3tnsILIc","ct":"m1OlwOgoBiT3Mn8SnuiBWjskRXxmYzg++WEuQsygbu2qatAng+VSOFmMyvujmtfi5HcUR4gJD8NB4wMeSEPHBz3bZzh+j24DPuuxCzVqEh5dYaFPkj+u3AZYA7edEU4dVYpXVleHYVKlsCANL/F4Tuf4OaagIpI++vHPRpnDNEhklxx2mgt4IXozzLqYCM8w4v6M2aSlKZG8pA=="},{"v":2,"sid":"238376118","name":"محمد الجواد مرتضی جمعه محمد","dept":"","pub":"BFRB3pYJa/dz6AP5RZE0DTDYk2sQN2cuKAdQT1hVNAGX+rt5FQXydFo8QgQY5C4q7EqurMhBl+SPmbhEeELZXaw=","salt":"Ffdd1psTK/DpKmTKV28DCQ==","it":200000,"iv":"GeP5LvWb26XSjExv","ct":"B3SPlsWzfHup46Ibeboh+C/KIdpqWWIduTPb6qJqpyw6UvBpCJ7YDF8TmefwkBemfLyAe8S2DzgxFJyR51/mPEspQW4QF9pJhp1Rbl64l3f4y5yHM4KL1NhNDgHSRpIrSxvG4Tdy/GwuPl9/suvMI0nVn0KRQfzyEQv1zZtqqWBlmbDtdIEiG3fqcE/LzLkOhe2IDATIYsJLjw=="},{"v":2,"sid":"152573188","name":"محمد تقى ستار جبار شمخی","dept":"","pub":"BD5nHk41/O+1DRMpmwOWloOJEnx/vDoUTxas+/BkWZy6Lhjn+jw16TQN8a/DY3A9z/ElzT0tJlHRHNOpOi1HCEo=","salt":"AeVXfFpntQ+Mq3HR1Pd6RA==","it":200000,"iv":"acQiNHTO6dx2MFXc","ct":"JTI3SIGDzTLzymzqrPIkvdtmu3osnb09Bi19J2vJFRHUNdP1Y7Ka1g11SY+348djge4TyFJbLPRif6d7mGUMawgVwHM0WjxRiB1Xsi72svHvEhb7tI6ZS2CuFEDZjZYv0D/0W0wLPoH4Az5GV0MqA5eYu9ShmBnSjxSecRTiVe5TKbMvR6nJC7TG6a3/nEIkjW+kvLZI3Mu0Pg=="},{"v":2,"sid":"132866102","name":"محمد شمخي فرحان مدیلی","dept":"","pub":"BJiW9ayD+mz1JFOvcw4oMFfzFkuUE/BtlFixY2phXdovEvCgDm6CazAI6tU1+RaVrvYsKDf2WDysk6jcwhUAnfY=","salt":"B5OGgEFMiIibXx2YUKFiyQ==","it":200000,"iv":"dgMIgqR5fOX/CoY2","ct":"aFfvHu/8uXB2wF3rbE9Q86pbmp6BTGq+62Ek01VzZQXZUn9Jz96E9yryPSew30bWADX0qLz0u1nPyvL0DQuDGHoGm8fmi+NB/eL/1xquAHKd+u2YpX4FKP+FmkzrAUg6ctmJh8MMGMtVA5ZJqXddyJqgyX2J7GqSltxGd0YS26vkGr7MqM8qUs2ZCAgQRlWHTPblEyR7EyAEsg=="},{"v":2,"sid":"184958688","name":"محمد صادق فرحان عطيه","dept":"","pub":"BFU0BpDYusXm3/yCo06zRL0/sAkup+zluIk8ksWwFVeg7yfafI5RVz684AHwX19XNojAFTdAbvtSJHD1dplWFlA=","salt":"gmE7WL6lr6VYHWJN3dObbQ==","it":200000,"iv":"mMFip0scvalIMUx7","ct":"Ths159h34VsfHYPkdo5W3g4KwlIEQ74TB0A0Ka6Fy3qfL04c6ALJKXyx054pfOYR6J1pv6hdeuRePAZYjI1YmdCkfDJE21tvBApHx/W6EgfDqhXX2khGw+PMWSTSXtOPkGEhlLvZSYeZTn6n31M7IHOhS8VHGPSucHubWr8cEgQwRj5iH3bLd8LNtp3Qb3gqwFwE70DYn+nZ7g=="},{"v":2,"sid":"616772599","name":"محمد صالح محمد حاتم","dept":"","pub":"BPx7vZeSLwXS0DbP7FszxbVCzO3/mVPmG5b6j2xculGWrIsXByxzbee7IjFQxxNJQojN/wI8RhZP12g1/lkAaGY=","salt":"rjlGbB7rLxnMQc03lVarCg==","it":200000,"iv":"9ffHcCzs+xLmgDo7","ct":"KTbaDXoiQ4aR214OtmOWS1tIuhaiUoJ1L37w28UbkRRluqYVwlNgc8ZqrGM3wZ1WkrP1GQzSkmOiIR+yj7iQ3k59/8taJ5AtdeqepDi1f5etBJ8uzVTx3v2MSRd+lZvPVUpAlZKmjdakgT/g3ZTZPknFMfNx3rAuT0uTAEeTcgEhKYBWFhfYwSGIjGW7X/+5w6L1kqW5AHP0zQ=="},{"v":2,"sid":"943562517","name":"محمد على عزيز عنيد لفته","dept":"","pub":"BLCTDhoEeptcJOXA1vBEMFXIIn6Mmkn1acmjlKZImXkWt9ugsKCdbQVJctF3Q/yYdEW8bUfKLOClP8mDSwI4+t4=","salt":"hlAH6aJvEqjEKDqOyn773w==","it":200000,"iv":"qAgU848ufZWMIpRq","ct":"Aq4VK/1zaCC58stbM1P7HzL4Vs4gorHEJZGsZnonrW82ofKO14NbLxs/zYZ5sDTD/jcPGHu1kG0Qq8RFUf08u/FBxLqog9RDhVhY0hlwxVsyDNyfyFyL2dB7yXVxeFpkJGxxPkx3tjG2nSIILY25et4Q4iHWJYj4rjaEVCRkRQBz48zM2hUR1iuWHHhQaBd2RyJsAZ2tk51v7Q=="},{"v":2,"sid":"420524269","name":"محمد على مشتاق غالب محمد","dept":"","pub":"BAi4HCW0nzy2xCDrQd5Yid4cbmOJRENtlRbGjEiCV6f+GqN6M8S8RbQ90fxI+9O1vXeQ2fwFNGzU10bCjdCKDdE=","salt":"BgjEp4TpLLjZPqX/U3nQ2w==","it":200000,"iv":"ZlzvAIcPWFTgNhnU","ct":"D51UP+WzAcMHr2wNOtTahCeRenW4qxD54DPiXHZC37YtSSt6WJc0aMX+VxMqPwZhKXmjf9NrwdzaOLNGq9kvbJHhgCLVgnYpCxl6fIQrHLqGmbdeE39BWs+A30iVOOlf6UDuuYPs3oyGAqWiu5lAH08bHtCEUWClZg5tS6OlpFt9Ol1hl7BWCMQDpH6+UBgSMPvW99uIk+x+vA=="},{"v":2,"sid":"972258530","name":"محمد على مهلهل لازم","dept":"","pub":"BJhu0Dn5IX13kgIa6ZfhRngYkt7qBkJWakXvUvbIHZy4wYiQ8HeBEQkL1cKWfNEqqz/1LHBjvEaGDXaJ514dNVU=","salt":"3gMMirVVraxpJ1t4UUse+g==","it":200000,"iv":"hiT2l+gqd3aocYPx","ct":"bxkTe1AW7LUeVCC2M4JR4A/5SyQdOFuOSuAfL8Gyc4zUWllY5LzV7v2olA9e4DwUss5PnhP+9A/X+8nyvyzSs6UvZDjwW3FSd+lyFP4Y3OOo8Wz2ykJ5U8z5JwQF+F1amvcyMmlZaU3AO9oq9peV1CVJQk+wWC42kyo+DoAJRUtV11PejwzA+Otw8jnUQR7sfDcMy6o1hO8pFg=="},{"v":2,"sid":"697214000","name":"محمد مظفر مزهر مهدي","dept":"","pub":"BCQMzcG1wz5fXAOexJJ1OdF5cBjvaG8AOCBDyPWbMJIiYBpIITvBHFzutXsB3o/DltUs9a80S7ulKocJMXBlYeI=","salt":"apgDX22XV5yeNgfqusydZQ==","it":200000,"iv":"YsBEjx7f2cRIOb2H","ct":"qs9V6FI6NCXc0i8W3f7ofKz6FNqK5tJXSR5yBhxPCxFINggfwjd625FWWi7TQLFXtpt+qHjF6HPo803Gnr2ImCQGJdRvlkuCZkzbXUaZmOHm3COsxsW6NhalctyCM5z/dlNN/lpJoPXfcJpYG7Y6w6OoLvUc4SC6McVHTP001Sm1N8Bm3jf9chpRloGqMNG6vlpwCvD8kx+Q/Q=="},{"v":2,"sid":"482283465","name":"محمود هادي صكر مهوس","dept":"","pub":"BDZGIBx2eA9QFBOinIM+jzoLO8ozLOFD4Vq1MGkqgqH1oAaf0379vxoN06av91M9qJaK86ROL+s1Df9vYESTaXs=","salt":"AsfBlt1BUBgRKJEgCrhxuQ==","it":200000,"iv":"GdVnRt8UzuGCOJCR","ct":"X7vAfgmQ2Z+cqAI9aPe4KS1VBsIIG3kdbR9ChkVFcCJnBgbiP5Z+Ukc01KhhbaQcv29XSQjd4eh60IOqa6qOxxc75IW+Hwi1o1KJkvBnWEPRyhkg+q0Q2pP5LLP7fxA9zZJO79jNU+u0D1ceoMzv9W/13opbYe+QP8lKz771GaNSDlPNKSk0gNPXU4rzlyTHDg3XIJI/w1/+sA=="},{"v":2,"sid":"201461699","name":"مرتضى زكى بريسم حافظ","dept":"","pub":"BMvEuHUY+XwHFJNUc+Hw+6aR4YqHaF0eiIrTBMFtWMXXEI/eO0k9zDahmhOFgf3ARSA3J6MBnIJMauKlSCPTq70=","salt":"dF3OiW7bjUOYnfnLdKLE7A==","it":200000,"iv":"7B21EwoQcMRKCt5t","ct":"Fq+3ii9jJydivvEx69eepmOfSZeVGMQWJ7THxycDVVZJeggPNG7Pv9RBSIFRAmB3iPTk8u46lh6OOfvVwMmfQ/nrDXmBhPj4cJmtarlIgsNO0mw8qwueAE7V0SgtCvgaUIgrEq+GP7RxxvNMINOJFh2zWVQyU03EeC37BSAUyA5jfJT7bfcLK/6RjeY+cRRcgxe9baukqA/5GQ=="},{"v":2,"sid":"146503850","name":"مصطفى احمد على شلش","dept":"","pub":"BEwJOcSOcv1TyadiXUa6KYvo45OhRh/9QhVq728QlLWWU4qa5QCiMLNOWoBBhIf7oE0y51lRSKwnz05VGSAWG78=","salt":"bE9oo4UerYuuKVj7rj6Kzg==","it":200000,"iv":"orRpNdXO/sE0njnV","ct":"bDERylloMAHHAEZQw3r57Op0YvAB5dlLXSBCMdYdNlz9VhgwPymZ1zGE2iYS+5m/Yph0MD9rXQMu47XHGAeSQZzVRdOuRzB7QX5s0GcL51kCmzRsF5vmjUe6JLk+3VP6FkOHM6H0siHjCkSH1bbyaCI8x0EBrAZ2aoc3vvENvV181e9PlXklYj4TbxNEPPX+0FlLiclYvbKziQ=="},{"v":2,"sid":"693696401","name":"مصطفى حاتم جابر على","dept":"","pub":"BHDm9mKPygPrbdZL0qQjXIIMYnGJVMPf8bJD8zPBjRYj4R1qCw3hHGrujogJhTuUeKqBxmZUljj/1lB1d8xrkvI=","salt":"G6+AuRFej8jg8v6N/nd7cg==","it":200000,"iv":"WaoEiksBtmSncgEZ","ct":"5RRUuSaQjvVeEsJG8zMs+wJQdBK7uHyUgSpWsEaOKmDD/n5ldzjftR4Y7n1KHSo1EMoV85t4KyEqo40zQUHdzsDPyoKIZpsC5i+p543XpFQv+reEyAozNy7ikc7VvmOUwd5LGtK7w7uA/htcr6gagzEq7tvgcAV/TDMJs7qSezqjTvNLSkd/tiA+34c0nG1zAd1T/dWrni6JOg=="},{"v":2,"sid":"647997549","name":"مصطفى على ربيل حسين","dept":"","pub":"BCzusQXYvaHVy2H8vtbM+gHwscVXrkQvHqKpTjI3sifPQXYb9ZJGUt1wZ+TTIORsFUvdgf/ZWBSZq9WWQk3jkys=","salt":"83IKf3Pz7uHYxxYBhzXdsg==","it":200000,"iv":"blU1CQvf9I6OKCeN","ct":"yNHAE3AnzMWP9v6/0Ue2HASm9F6v+LM5TPX8b+GjX4yskfjeJNWKwBFnUG1YdGjtF82d0NhGiLnMfR2oFwg5lji6zPtsB7pvrpGfIOKsMSbFRakDV4sCnMxCh3w8d0PblwGt8aPdQDcRhjjc8equz3N982zC/oPbnC1tjHdfKIO9+S++qeUqp6SpxOqLeXw/K10FPQuHKURiaQ=="},{"v":2,"sid":"376980735","name":"مصطفى محمد صبيح رحيم","dept":"","pub":"BIA5mhmhJ9IMLFFd1pD0Bp6ugoSV50YB8J0CXQbnBb2KNtvP2nq0W95hgWLMNV2CPt0vkwg7Tq5OLuJnGVXeHI4=","salt":"Pxt4+51u2JXgJDTEvNT3pA==","it":200000,"iv":"K79/QVFBoQjeqTTA","ct":"zHMqoJn4WMH5jhsLPhSDm5VBVgZbhD5waAeWXq3xKJKZkqFaosV3H9dLW+vQF/tPgo7bH6JpN+wsQ53zThVA+ABB/m1/H+zkqPmOcWJg0mUyX9iFFKuUTQkUwytUDhsVb3jYr2VQDLS+5O+zmT/EjoyB18ARJrMDSavCx56BtNa8qNBeVPZbx1i06tOOkBwqGz1OzBJJEd4KSg=="},{"v":2,"sid":"106180886","name":"مصطفى میثم شجر اسماعیل","dept":"","pub":"BNLJKJ98C2Voyxexy27cX1PQAZ1sjoIqG63EoSs0JaVMX0rD8teAtZXOWu7lgR4SNMgJDOI3P1l7X3i5LbFiBns=","salt":"bwI75XCna1UBlaVU1GFR7g==","it":200000,"iv":"iB8qo93JvSSgHJGa","ct":"RM4RBCWha3PtjcicjSXdKq/HPBs3YnuSeC9aNiL6yYVfAEebnAKWBHCQ8GDfaxJVRQfIxDxN8Kv3p9aVmA230TXwmaRW+Sr8Ehh7w5zJB2//NGbRwqP2I60IIxTsEx8agP+zVOhMC2UMk4X6XXdibaaeDOIXqwj24Id80vbEisPh/4xvQfikScuHFmixd78f/T39D+OZEtbtYg=="},{"v":2,"sid":"684775833","name":"منار حيدر عبد الزهره شرهان","dept":"","pub":"BBY89yW8jvxdsAXYbtr7XJvT8JchTRJi6AzRFHEPvs/9dplRRnAAMe4rrxxKmKDXEIb4KvvdAUR+rTqoZCJoEOQ=","salt":"9pFEmmMtUvFIh5yzVubBUw==","it":200000,"iv":"eWBfVLV1p9eS6E2L","ct":"0F3jOmbV4lib5B6RJ4MrwG30RFDJpkKueob+QpH3uFtnb5xKy0WpZn3/j2+mcAyIRLnLlTSVNrCxFX5Y5R4sAqcr/NQ/iyyjwsvPiSz9VUfnDOrWmEgPOBMNxIn4W1HHLOwk1x0iIh5+7Voki1kMQ3Flnr+TAd4QSVvA10I8Zc6WYZTE9wnKcny/wREI/s014K9kcE1orarlpg=="},{"v":2,"sid":"424934966","name":"منتظر رعد رشك كسار","dept":"","pub":"BOa8+3zjKoeZ1QlQ7SSgExAIazmlc9tBwuJPEtEjeE9D3PeGII+UPIyGwAbtGWxu5aE3kVtKfkXyYcB1RIBq0VQ=","salt":"8NVU1NC2sOwjo64zr8XW+A==","it":200000,"iv":"HSuK1p5PkXNz/dsU","ct":"ph2CwkdPdCbdXziUgKJBLV+PsceIbx9ajK7eGXAh+/MimiQC2kPKXB4uv3gOV+AMsgaMmZvM+Ayd39BfQW2RKcicUx+EKRDRCS7zvrmi3X+BM4s2OirRs2aj8qpNrZwt4dL4JA87yRQSdBnKJru2hRacwRFsnkzuyLsTDc/EHTyKoU2g1kX8QLLRY8tA+Bg6KiJ5K3hnfgIxdw=="},{"v":2,"sid":"858179017","name":"مهدي باسم محمد محمود","dept":"","pub":"BOolemWkv7obbncDIaICEpKpieoHTkswzC11Be/bP+KMd7nT7iRH/nBo0zgzfZxH55Dzjrk5BQUx5JS76lXFvDE=","salt":"m29NGljb1YFphRbAlmmbJw==","it":200000,"iv":"5zzc1N6gPjSiY/iO","ct":"nwGGONgQZ+qoJyPSCl+z1ho80MHQjkW1z8WFC/DrELtrsagkI1bBusgxyn96kn1YAJkMO6Usvgy6oE7FFiD/3LH4I4XYkzyVwMiEjYCQBKDRawfdHGnrAuwP6WqxIqr8Lf7/xlDCtNX98O3axVLzKI0mv/0w97I7ywIkV8QT+kSjpbE7d7bh/M85rAO/cYnOB9cARknApSHjBg=="},{"v":2,"sid":"345711948","name":"موسی احمد حسن لفتة","dept":"","pub":"BFa5WXEg0BnMvNAk31i0TlM28ot5rTh41LgFJKHCAQuIg5pF3bMdhixj6eNz4bemELSC+wCRWBvJtHWIVP52XcA=","salt":"PSjEaZTBlS/MPPYQO6DJYQ==","it":200000,"iv":"8Aob3gkm2Pk87aA8","ct":"73CzLZQaAVfia4KcGp6wEE1aWQqDWXPMuKZe7n2v8WoKD1JvsrJervCU3JrHoYPGiZPJ4k2nuJG9yvT9L6XgNXN/j6WijwlPH2AUWCK84wz4jFDOXslGet/mJJE6kIxxhOJ66LDylQLcS/dG7w3T0u6KQw3zSo/9DH8nOD3l4lRiMq/qJLSC0jpD53Pg5taZPoTZDHI3OFQnIg=="},{"v":2,"sid":"732335190","name":"موسی سلام صدام نعیمه","dept":"","pub":"BKDY2iCkzMRu3teIY2TSgjxw8Y7dDj6fYWQ89orLF61x0e8BJK999n3MJVKfv64rbHzHp7kuh9zugYTcvbrbnfc=","salt":"hPKILbYG7sbn3G+BJXqoJA==","it":200000,"iv":"KkThAM0hbSEW5uKL","ct":"zL9aZLgFxO2/LamjtkL7cs37WZx8BsHe7yVRxAHYAWYE3evPkTGH4DEbohUs61q2Ij2dQdhNSujQzfEutoLxp8UgCoM/lcaFbelE/kUbQOGTevpcIP9cEvvU/ebFUkxkjW7SukPLJvnKIhLwE7gK3kveLbX1ty+mAje/aK03E8mWOwqP7BAEE1anuDoJRO4tQw/zdQvJQxEq4Q=="},{"v":2,"sid":"218553414","name":"موسى على نبيل عاشور","dept":"","pub":"BDxGoPmIQm4juh9kqsHYHtfw28sMEgrqFxk6x8Wve/4la0I4f2b0n+xpFyv95E1Lb4EQr4oShJ+zKw9QSfBqcBM=","salt":"EfefYFhaZ0lZtBrxkDoRfw==","it":200000,"iv":"sRT+HL2dH5vqkXOl","ct":"EjWn8XTm8awE5tBsroBapZVPkKjino+on2Tbuo2vYqntXrOpX4Fjkk/MDMXApyZP4Tza2tpTrr/kRf/C5eaRRn6Zv7uXLP1TXQ7xeLAj4a+g8J1upaHNxKSsCARNXhQiMOpMjpST31V0Uk3u6OarXzQZShFbCot1XAmaEurJyvmHfmkSHH1ZnQ4IrW+WjJvr9Sci2BEVjdgjUg=="},{"v":2,"sid":"851629489","name":"مینا میثم سلمان حسون","dept":"","pub":"BPVuWFs+P6HzoK3E9fiDHUWbUjs+I7xD6lvJiB7cVRyq1LbEkYfGo9O2owPYDhNzYUMjGa6K1c/JvgU3BNPw3n8=","salt":"C7OeJu4zrmbJNaTvTPH9LQ==","it":200000,"iv":"LIkr5MrEBbRqKk8o","ct":"ItaGyRMHbC9ay0BQXrpJGTENAlfmFyDAtVvY1w/50g5rCfEQsDpyULBLM/6lBbX+Y0NIXVvVyN6SF+X5XHlBKedYmzjrZsq21COP9i0HfZ0FHtfLR5f0sc+l3f5wAvUDKIjoizISnNC66wG8c+qsYaSaj2ej2WRXhyXRIk8OXQ9B5pyjfb2wQqHZtPjTw294Si7ha4dl95tAOQ=="},{"v":2,"sid":"259694251","name":"نرجس وسام رحیم رسن","dept":"","pub":"BLuc5n+y/W3mFfliVcxNgIw+RpjzzzdzSXkLgv+ANh+oFwHRfGBsiGyWZlaE6W0/Htex3qlNTxBn2cM7nT27ftU=","salt":"NtEMdufW4wOv6SkEpbi+gA==","it":200000,"iv":"vnEyetuzgGTbGGJB","ct":"DZJm43s5+EeIwNk7bdaQ+V7lZmb0nO/H84CLqsa30PDrsU3AXCKKgTO7cVwOqkQCyH4/31DCY1tieavHmggVR93FHJbrlh+vH7QJDfS14SWX+AMA7G+V2XYaeVo2i2Tg+Y6TGqZRoejunCjYN/D14bGN/+PXNGQUJn5AjUO68ALl767qTmMHBQy3TEy9+eZWTZW/hhnMc/ppLw=="},{"v":2,"sid":"282594425","name":"نور الزهراء رعد بدر بديوي","dept":"","pub":"BNMglIdkXBNviVXTzrAsWEI/mp+/xohB7k0KBpHwvrQrjUMkTBtKvOMcwvKjhLGWWWBTbypGpIrvM0LXL+Wdz9o=","salt":"jPLLt/x3cvpPlxG29eOdnA==","it":200000,"iv":"iCn2EuGIKMWJ3FvC","ct":"tYrZ6lN0QW4k/r1H/9hbHAWBC7nb6l0OQFAMjZkjnhEJMUhpGvBxFYXYR6RYLDi9YaC/UaD9Xy4x8cprGzdO6m7RrZcEzNq1I6H5asMZCs915uVYaM9Dgmd8+ZZ/BPRHjOX/1L5OI2c1BrhIMZAp2mVGTpLLaOujTuLOxfZd1+fkQNdgA4WYl/Pha0Mj1dEXw3b4RvuZsq0ZgQ=="},{"v":2,"sid":"360504480","name":"نورس صلاح حسن قاسم","dept":"","pub":"BFPrYcJhCK9pyjtDTbVpUD+tQwlg5NCBXPy/ejwTWMyOVUvZ657y1P0zBHwbiQsCoB/imMQyc8uofXbqknC2hrg=","salt":"2h30XcyXe58aPUpAncVA0Q==","it":200000,"iv":"uW7DOYH/tJG5iM07","ct":"FDtuyYkmPVmKm1w3qt1g2ymQ+GEgdROlYKMiXr9NQTwVt4o8w/pIZ4zbj3avAfSl8paECfPvvRrnwYjJM5jQxYYjylbVljuYfM1BjpYmhTgsjdOUQQFcpWgdFD207oMg9NKcKEp/zvxXTVN/stvkniriTyTJ+PA7Ao7HmeAKpMffwlIjAAjGrN9hafhcLO3QYjhPzgsDZVCIfg=="},{"v":2,"sid":"989243628","name":"هبة الرحمن احمد كريم شلتاغ","dept":"","pub":"BBoSLwbT4JV5eiurJR6IdkQwgPjpEqNPlf7YVwLOvoGXNbvvRyVfXcJ5yBVBJqpz8y+GNSQtNQtlsCL9tZMzSI8=","salt":"UxznlSMPBgRTqHsTT1bPGA==","it":200000,"iv":"eQEfaHMtnzh1PL/i","ct":"x/6X1un84zZnM/yaGdfz/sdjvAye0wcs5Rjb3O3M1fhfkT8HKx75hThQNLHvkmD5o4nltWwCQW72MyltvEsV0SutQLTc1nUWHxOB7K59jiaoMpTNPnlTMozHmHuTrzJ3vYbPUYvqOItvVCJMmFOBodOUAE4iZUlonZHoYR7MPyvgKI7mvJf56vF1Ccb2nNJVWcACdDxG87CUag=="},{"v":2,"sid":"153889487","name":"هدى على نعمه حسين","dept":"","pub":"BGJCy78IiUSk3u9s3NY++MPsNp4NedGGJMpLTdjTV7gbwGSLT0NxATb/FiND4LiSA/oRGN9ZPUdrKp1FB3sejMA=","salt":"aNt+0ykA6nYHGpq+vuRNMg==","it":200000,"iv":"SneVgnLWx/rUtGSN","ct":"nfrGgH+kxawb9Wb+1ZSS/eC9EXH7SjqVrHgPdh7F+IxEdZ70Kl6c+dgBzUwR+CWtVXb/eGlrnlCOsB/YqAYwjewk9HSB9gpf4ljPWEP2qAyCm0DCCNwEXyntQN86y6dp4/2RP7yOO5oGhj8x9vq1n6ZiyHkmk/DBj9wq1o8minyylDv4ss0852VIjGKkgbXVWwF7A3H267recg=="},{"v":2,"sid":"402748910","name":"هشام محمد لعيبي بهير","dept":"","pub":"BLLEzI0inZ35m+bZPUjEgR/4RstmRBl3CDjUN3G9Eh7Gi9AKKWUy2Nq5Z9r10R6mTLiOJvn6hHpNwjFYJ3Noo9s=","salt":"HJRIs1+9e4aMMT0o8G+4Og==","it":200000,"iv":"Bsq7myz5GyXGOeJa","ct":"NFaBOhY7Je0yic0pnPDr3vFT0IBCW6KjduZRYYZ+ktI4D8YEdLUbdij6FmQ//0aWfhb900JyO7OhdRjFJIRrNFCrg/v4Jrp+9/yZvJF+SdC9Kbc8iHZ5uoj8Rw6PRl8g/BSaUukuDkmkewWKz4TfSZBr4RIe02to389xEdGEiDi+KCGhAIDhcM6tou8hYPMIoxOzNsOghV4chw=="},{"v":2,"sid":"832240524","name":"همام مصطفى صباح عبد الزهره","dept":"","pub":"BNL4eBBKKjT0HhVSbO+LgJ0u5BJF/pEEwZLnC0wWwy6wf0kvjrnN3yqVhbYnamZdgIGGB6tVDnbf7RkoP51Y61M=","salt":"keRtzQIOlNrDVSRwrdLLPg==","it":200000,"iv":"CS3l1XA3f+1HBYk6","ct":"nopUOTQA/hAoL1V7GQDdTapggwxgD91BZck/9Evoq2ktE6Cb/JVCNTjgTKgMi/E13+zNGClvu10Y1HvqFIxtiHRJrX3ULco/48TxKyvNlRsXkpgYZzxcE4iv5fqy+jRH3tkgfFda+Oyb/Npkx5Lb/ywvam5c7BKn7NRZuz7kgRTQImXnG30gdvDBr0lD5h1Ih/SoNiRyUVrtlA=="},{"v":2,"sid":"977163014","name":"ورود کریم زیدان کاظم","dept":"","pub":"BEfViO0PFn5eobOKOWtqv0DfIZ93DAe6HxIRuqP9ypDrVQNda7e+Y+UNP8HwvQQqKGltaLn/Mc2icPjNKCjVDSU=","salt":"276+9kkRH2BERU5z8UJuoQ==","it":200000,"iv":"CghzeCwjocZTUMkV","ct":"rgS4jdi/zVnrYqZE/WJLxzfR5OEn/AzPp08QvganVa3hsnsgT0vygmCfglRYhUarxTdECQLixjSdYmMigP/bUxRiZXBXzCDKcBkvxN+/hBpMuqaIUZJE+/yMND9R7FYf4F6vHWM7Vf2UQw8vB/Ml3pIn5kTJRsGyCivO1dYdetDSYE+xgMahOadP1WFRSC3kgPOqKpnr4ESIFw=="},{"v":2,"sid":"732202497","name":"یقین میثم رشم رحمه","dept":"","pub":"BHnIPo/+gS5b+mXYuWzIYwQY0VGVkT3p6Rk2hUxIIFaZUik+/vM+wh8yIcyYfihpUbCviHLsep+cqArg7AHakxk=","salt":"3y0jHGXwYCyzyxOuE9BUYA==","it":200000,"iv":"kBadX9o8R09JAJLi","ct":"cU/CTXsjJZGmVUoy4VDsmzUuuvfHZROc7UX+4/q705HiqCNnW82bsmKwA320RAbKd7v2BXJlAxhzxSHVIBr6068vLAFn+r4QY9qu47SwIKXJQSnLmwjRX8/HdzXPum19f40pTERWX1ySzAy5g8l2SzT58MeK0Vy2fSsnTNzEPV6I9/RjMS6Fvu5ksbsfGJM6Hsxi3IPa9bg0Rg=="},{"v":2,"sid":"508178699","name":"يوسف هيثم صدام عليوي","dept":"","pub":"BMz8BhH+oEKZOGt445+WYobGuFyNewnRQPM3kLiRQi0L9QQYct44qbvEs0c7kVqFktcFQ8CM9KVaNLhrvj0/P8M=","salt":"xpAVHaf7I9kW7ngJhKcOug==","it":200000,"iv":"L6FtNs8sSoN0mN59","ct":"YDRxcZLKGR5jahienj1zwOzygjBSt7lUVXUk9foj62JkiNactliUSfo4lprYl70s1h17Etfi2nzxHBuFzVlLJ0Q5sqnnyfgmMPuqXm1daHf+T0h1OxRdlWAikTYIriMVQDdW1WazdGZMnsdok4EIj5Pd7lyc/fFbmivdzr0KXLsA6vVpLBZfTTS4eCsXy+4JzN5E7FZbxAT4NQ=="}];
+const $=id=>document.getElementById(id), norm=s=>String(s||'').toLocaleLowerCase('ar').replace(/[إأآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[ًٌٍَُِّْـ]/g,'').replace(/\s+/g,' ').trim();
+let current=null, priv=null, dev=null, timer=null;
+const ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)), hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''), S=window.crypto&&crypto.subtle, E=new TextEncoder();
+function keyFor(D){return 'ua2_'+D.sid+'_'+String(D.pub||'').slice(0,12)}
+function normalizeCode(v){return String(v).trim().replace(/\s/g,'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d))}
+async function openStore(){return new Promise((resolve,reject)=>{try{if(!('indexedDB' in window))return reject(Error('IndexedDB unavailable'));let r=indexedDB.open('UniAttendCardStore',1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('cards'))r.result.createObjectStore('cards')};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error||Error('IndexedDB open failed'))}catch(e){reject(e)}})}
+async function saveState(st){try{localStorage.setItem(keyFor(current),JSON.stringify(st));if(localStorage.getItem(keyFor(current))===JSON.stringify(st))return}catch(e){}let db=await openStore();await new Promise((res,rej)=>{let tx=db.transaction('cards','readwrite');tx.objectStore('cards').put(st,keyFor(current));tx.oncomplete=res;tx.onerror=()=>rej(tx.error)});db.close()}
+async function readState(D){try{let v=localStorage.getItem(keyFor(D));if(v)return JSON.parse(v)}catch(e){}try{let db=await openStore();return await new Promise((res,rej)=>{let r=db.transaction('cards','readonly').objectStore('cards').get(keyFor(D));r.onsuccess=()=>res(r.result||null);r.onerror=()=>rej(r.error)})}catch(e){return null}}
+function show(which){['home','lock','card'].forEach(id=>$(id).style.display=id===which?'block':'none')}
+function renderList(q=''){let nq=norm(q), list=CARDS.filter(D=>!nq||norm(D.name).includes(nq)||String(D.sid).includes(nq));$('count').textContent=`${list.length} من ${CARDS.length} طالب`; $('results').innerHTML=list.length?list.map(D=>`<button class="student" data-sid="${D.sid}"><span><strong>${D.name}</strong><small>الرقم الجامعي: ${D.sid}</small></span><span class="arrow">‹</span></button>`).join(''):'<div class="empty">لا يوجد طالب بهذا الاسم</div>';document.querySelectorAll('.student').forEach(b=>b.onclick=()=>selectCard(b.dataset.sid))}
+async function selectCard(sid){current=CARDS.find(D=>D.sid===sid);if(!current)return;let st=await readState(current);if(st){try{await start(st);return}catch(e){}}$('selected').textContent=current.name;$('code').value='';$('err').textContent='';show('lock');$('code').focus()}
+async function start(st){if(!S)throw Error('crypto');priv=await S.importKey('pkcs8',ub(st.pk),{name:'ECDSA',namedCurve:'P-256'},false,['sign']);dev=st.dev;$('name').textContent=current.name;$('sid').textContent='الرقم الجامعي: '+current.sid;$('dept').textContent=current.dept||'';show('card');await draw();if(timer)clearInterval(timer);timer=setInterval(()=>draw().catch(()=>{}),1000)}
+async function draw(){if(!priv)return;let t=Math.floor(Date.now()/1000),sig=await S.sign({name:'ECDSA',hash:'SHA-256'},priv,E.encode(current.sid+'|'+dev+'|'+t)),p='UA2-'+dev+'-'+t+'-'+hex(sig)+'-'+current.sid,q=new QRCode(0,QRErrorCorrectLevel.L);q.addData(p);q.make();let c=document.createElement('canvas'),x=c.getContext('2d'),n=q.getModuleCount(),sc=8,m=4;c.width=c.height=(n+m*2)*sc;x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#111';for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect((k+m)*sc,(r+m)*sc,sc,sc);c.style.width='100%';c.style.height='auto';$('qr').replaceChildren(c)}
+$('search').oninput=e=>renderList(e.target.value);$('back').onclick=$('change').onclick=()=>{if(timer)clearInterval(timer);try{localStorage.removeItem('ua_selected_sid')}catch(e){}current=null;priv=null;show('home');$('search').focus()};
+$('activate').onclick=async()=>{let code=normalizeCode($('code').value);if(!code){$('err').textContent='اكتب رمز التفعيل أولاً.';return}if(!S){$('err').textContent='افتح الرابط في Safari أو Chrome حديث.';return}$('activate').disabled=true;$('activate').textContent='جارٍ التحقق...';try{let km=await S.importKey('raw',E.encode(code),'PBKDF2',false,['deriveKey']),k=await S.deriveKey({name:'PBKDF2',salt:ub(current.salt),iterations:current.it,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']),pk=await S.decrypt({name:'AES-GCM',iv:ub(current.iv)},k,ub(current.ct)),st={pk:btoa(String.fromCharCode(...new Uint8Array(pk))),dev:hex(crypto.getRandomValues(new Uint8Array(4))),at:Date.now()};await saveState(st);try{localStorage.setItem('ua_selected_sid',current.sid)}catch(e){}await start(st)}catch(e){$('err').textContent='رمز التفعيل غير صحيح أو تعذّر حفظ البطاقة. جرّب Safari/Chrome بدلاً من المعاينة.'}finally{$('activate').disabled=false;$('activate').textContent='تفعيل البطاقة'}};
+renderList();
+async function restoreSavedCard(){try{let sid=localStorage.getItem('ua_selected_sid');if(!sid)return;let D=CARDS.find(x=>x.sid===sid);if(!D)return;let st=await readState(D);if(st){current=D;await start(st)}}catch(e){}}
+restoreSavedCard();
+let deferred;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e});$('install').onclick=async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null}else{alert('Android: افتح قائمة المتصفح واختر تثبيت التطبيق أو إضافة إلى الشاشة الرئيسية.\n\nالآيفون: افتح الرابط في Safari ثم اضغط مشاركة ← إضافة إلى الشاشة الرئيسية.')}};
+</script></body></html>
