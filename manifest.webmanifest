@@ -1,0 +1,10 @@
+{
+  "name": "بطاقات الحضور UniAttend",
+  "short_name": "بطاقات الحضور",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f7fc",
+  "theme_color": "#13233f",
+  "lang": "ar",
+  "dir": "rtl"
+}
